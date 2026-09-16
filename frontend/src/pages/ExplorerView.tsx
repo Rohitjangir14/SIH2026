@@ -11,12 +11,12 @@ import {
   ShieldCheck,
   Layers,
   ArrowRight,
-  Sparkles,
   Terminal,
   FileCode,
   Lock,
   Database,
   CheckCircle2,
+  Loader2,
 } from 'lucide-react';
 import { fetchLogs, getExportUrl } from '../services/api';
 import { ProcessedLog } from '../types';
@@ -210,7 +210,7 @@ export const ExplorerView: React.FC = () => {
               {loading ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <Sparkles className="h-4 w-4 text-blue-400 animate-spin mx-auto mb-2" />
+                    <Loader2 className="h-4 w-4 text-blue-400 animate-spin mx-auto mb-2" />
                     Querying normalized Universal Schema records...
                   </td>
                 </tr>

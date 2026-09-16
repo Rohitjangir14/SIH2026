@@ -34,13 +34,13 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col font-sans selection:bg-blue-600/30 selection:text-blue-200">
+    <div className="min-h-screen bg-[#090d15] bg-grid-subtle text-slate-100 flex flex-col font-sans selection:bg-blue-600/30 selection:text-blue-200">
       <Navbar currentTab={currentTab} onNavigate={setCurrentTab} />
 
       <div className="flex-1 flex">
         <Sidebar currentTab={currentTab} onNavigate={setCurrentTab} />
 
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-5 md:p-7 overflow-y-auto max-w-[1600px] mx-auto w-full">
           {renderCurrentView()}
         </main>
       </div>

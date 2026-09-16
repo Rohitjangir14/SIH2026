@@ -4,31 +4,37 @@
 
 @layer base {
   body {
-    @apply bg-[#0d111a] text-slate-200 font-sans antialiased;
-    letter-spacing: -0.01em;
+    @apply bg-[#0b0f17] text-slate-200 font-sans antialiased;
+    letter-spacing: -0.012em;
   }
+}
+
+/* Subtle micro-dot pattern for enterprise command-center depth (non-distracting) */
+.bg-grid-subtle {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 /* Professional enterprise panel styling (No neon / No bright glows) */
 .glass-panel {
-  background: #131824;
-  border: 1px solid #202738;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  background: #101522;
+  border: 1px solid #1c2436;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
 }
 
 .glass-panel-elevated {
-  background: #171e2e;
-  border: 1px solid #252e42;
-  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.35);
+  background: #141b2a;
+  border: 1px solid #222b40;
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.45);
 }
 
 .glass-panel-hover {
-  transition: all 0.15s ease-in-out;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-panel-hover:hover {
-  background: #182030;
-  border-color: #333e56;
+  background: #161e30;
+  border-color: #2b364e;
 }
 
 /* Clean minimal scrollbars */

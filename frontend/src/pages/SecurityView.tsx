@@ -6,7 +6,6 @@ import {
   CreditCard,
   EyeOff,
   CheckCircle2,
-  Sparkles,
   Play,
   Check,
   AlertTriangle,
@@ -181,7 +180,7 @@ export const SecurityView: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-400" />
               Interactive Sanitization Sandbox
             </div>
             <h2 className="text-sm font-semibold text-white mt-0.5">

@@ -8,13 +8,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0d111a',
+        background: '#0a0d14',
         surface: {
-          50: '#111622',
-          100: '#151b29',
-          200: '#1a2233',
-          300: '#222c42',
-          400: '#2d3a57',
+          50: '#0f141f',
+          100: '#131926',
+          200: '#182030',
+          300: '#202a3f',
+          400: '#2c3954',
         },
         brand: {
           DEFAULT: '#2563eb',
@@ -26,8 +26,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'Fira Code', 'Consolas', 'monospace'],
       },
     },
   },

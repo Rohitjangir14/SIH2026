@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   UploadCloud,
   FileText,
-  Sparkles,
+  Loader2,
   CheckCircle2,
   AlertCircle,
   Play,
@@ -349,7 +349,7 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
         {/* Live Auto-Detection Radar Banner */}
         {detecting ? (
           <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2.5 text-xs text-slate-300">
-            <Sparkles className="h-3.5 w-3.5 text-blue-400 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 text-blue-400 animate-spin" />
             <span>Scanning log structure, timestamp signatures, and regex syntax heuristically...</span>
           </div>
         ) : detection ? (
@@ -396,7 +396,7 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
           >
             {processing ? (
               <>
-                <Sparkles className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 <span>Executing Ingestion Pipeline...</span>
               </>
             ) : (

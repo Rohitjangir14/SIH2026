@@ -219,7 +219,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           <button
             onClick={loadData}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-750 text-xs font-medium text-slate-300 transition active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700/80 bg-slate-800/80 hover:bg-slate-750 text-xs font-medium text-slate-300 transition active:scale-[0.98]"
           >
             <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin text-blue-400' : ''}`} />
             <span>Refresh</span>
@@ -227,7 +227,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
           <button
             onClick={() => onNavigate('ingestion')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white transition active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white transition active:scale-[0.98] shadow-sm"
           >
             <ArrowUpRight className="h-3.5 w-3.5" />
             <span>New Ingestion</span>
@@ -235,10 +235,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
       </div>
 
+      {/* Quick Interactive Test Bench Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5 p-3 rounded-xl bg-[#101522] border border-slate-800 text-xs shadow-sm">
+        <div className="flex items-center gap-2 text-slate-300">
+          <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+          <span className="font-semibold text-slate-200">Interactive Pipeline Sandbox:</span>
+          <span className="text-slate-400 hidden md:inline">Instant test feeds with auto-detection & Luhn masking</span>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {['Linux Syslog', 'Apache Web', 'Nginx Error', 'Windows Event', 'AWS JSON', 'CSV Data'].map((feed, idx) => (
+            <button
+              key={idx}
+              onClick={() => onNavigate('ingestion')}
+              className="px-2.5 py-1 rounded-md bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 text-[11px] font-mono transition active:scale-95"
+            >
+              {feed}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* KPI Metric Cards (Clean, Solid, Corporate) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Logs */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800">
+        <div className="glass-panel glass-panel-hover p-4 rounded-xl border border-slate-800">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Total Ingested Logs
@@ -259,7 +279,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Success Rate */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800">
+        <div className="glass-panel glass-panel-hover p-4 rounded-xl border border-slate-800">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Validation Rate
@@ -280,7 +300,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Errors & Alerts */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800">
+        <div className="glass-panel glass-panel-hover p-4 rounded-xl border border-slate-800">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Security & Error Logs
@@ -301,7 +321,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Processing Latency */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800">
+        <div className="glass-panel glass-panel-hover p-4 rounded-xl border border-slate-800">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Avg Batch Duration
