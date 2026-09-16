@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 from dateutil import parser as date_parser
 from app.schemas.universal_log import UniversalLogSchema, SeverityEnum, LogSourceInfo
 
