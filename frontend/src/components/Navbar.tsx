@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   UploadCloud,
   Clock,
-  Gauge,
   Search,
   BookOpen,
   ExternalLink,
@@ -63,11 +62,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
             </kbd>
           </button>
 
-          <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800/80 text-xs text-slate-300">
-            <Gauge className="h-3.5 w-3.5 text-blue-400" />
-            <span className="text-slate-400 text-[11px]">Throughput:</span>
-            <span className="font-mono font-semibold text-slate-200 text-[11px]">9,250 EPS</span>
-          </div>
 
           <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800/80 text-[11px]">
             <span className="relative flex h-2 w-2">
