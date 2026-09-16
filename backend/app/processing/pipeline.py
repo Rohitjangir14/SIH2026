@@ -109,6 +109,7 @@ class ProcessingPipeline:
         forced_format: Optional[str] = None,
         job_id: Optional[str] = None,
         mask_data: Optional[bool] = None,
+        pseudonymize: Optional[bool] = None,
     ) -> ProcessingJob:
         start_time = time.time()
         
@@ -192,6 +193,8 @@ class ProcessingPipeline:
 
                 # Stage 5: Clean and Mask Sensitive Data (Honors configuration)
                 cleaned_fields = data_cleaner.clean_record(parsed_fields, mask_data=effective_masking)
+                if pseudonymize or (pseudonymize is None and settings.ENABLE_SALTED_PSEUDONYMIZATION):
+                    cleaned_fields["_pseudonymize"] = True
 
                 # Stage 6: Normalize into Universal Log Schema
                 normalized_schema = log_normalizer.normalize_record(

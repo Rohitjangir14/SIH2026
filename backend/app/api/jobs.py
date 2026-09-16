@@ -5,13 +5,18 @@ from sqlalchemy import select, desc
 from app.core.database import get_db
 from app.models.job import ProcessingJob
 from app.models.validation_error import ValidationErrorRecord
+from app.models.user import User
+from app.api.auth import get_current_user, require_analyst
 from app.schemas.job import JobResponse
 
 router = APIRouter(prefix="/jobs", tags=["Processing Jobs"])
 
 
 @router.get("", response_model=List[JobResponse])
-async def list_jobs(db: AsyncSession = Depends(get_db)):
+async def list_jobs(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     result = await db.execute(select(ProcessingJob).order_by(desc(ProcessingJob.started_at)).limit(100))
     jobs = result.scalars().all()
 
@@ -40,7 +45,11 @@ async def list_jobs(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{id}")
-async def get_job_details(id: str, db: AsyncSession = Depends(get_db)):
+async def get_job_details(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     result = await db.execute(select(ProcessingJob).filter(ProcessingJob.id == id))
     job = result.scalars().first()
     if not job:
@@ -49,6 +58,7 @@ async def get_job_details(id: str, db: AsyncSession = Depends(get_db)):
     err_res = await db.execute(select(ValidationErrorRecord).filter(ValidationErrorRecord.job_id == id).limit(50))
     errors = err_res.scalars().all()
 
+    can_view_raw = current_user.role in ("admin", "analyst")
     rate = round((job.processed_records / job.total_records * 100) if job.total_records > 0 else 0.0, 2)
     return {
         "job": JobResponse(
@@ -70,7 +80,7 @@ async def get_job_details(id: str, db: AsyncSession = Depends(get_db)):
         "validation_errors": [
             {
                 "id": e.id,
-                "raw_content": e.raw_content,
+                "raw_content": e.raw_content if can_view_raw else "[REDACTED - SENSITIVE RAW CONTENT REQUIRES ANALYST OR ADMIN ROLE]",
                 "error_type": e.error_type,
                 "error_details": e.error_details,
                 "created_at": e.created_at,
@@ -84,12 +94,13 @@ async def get_job_details(id: str, db: AsyncSession = Depends(get_db)):
 async def replay_job(
     id: str,
     forced_format: Optional[str] = Query(None, description="Optionally override parser format on replay"),
+    current_user: User = Depends(require_analyst),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Forensic Replay Engine:
     Re-processes all immutable RawLog records from an existing batch job
-    through the latest pipeline/parser versions.
+    through the latest pipeline/parser versions. Strictly protected by RBAC.
     """
     from app.models.raw_log import RawLog
     from app.processing.pipeline import pipeline_runner

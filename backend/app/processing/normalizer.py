@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, Tuple
 from dateutil import parser as date_parser
 from app.schemas.universal_log import UniversalLogSchema, SeverityEnum, LogSourceInfo
+from app.core.config import settings
+from app.processing.cleaner import data_cleaner
 
 
 class LogNormalizer:
@@ -129,6 +131,12 @@ class LogNormalizer:
             metadata["timestamp_is_inferred"] = True
             metadata["timestamp_quality"] = "INGESTION_TIME_ASSIGNED"
 
+        user = cleaned_dict.get("user")
+        if user and (settings.ENABLE_SALTED_PSEUDONYMIZATION or cleaned_dict.get("_pseudonymize")):
+            metadata["user_pseudonymized"] = True
+            metadata["user_pseudonymization_algorithm"] = "HMAC-SHA256"
+            user = data_cleaner.pseudonymize_identifier(str(user))
+
         return UniversalLogSchema(
             id=log_id,
             timestamp=dt,
@@ -137,7 +145,7 @@ class LogNormalizer:
             event_type=cleaned_dict.get("event_type"),
             message=message,
             host=cleaned_dict.get("host"),
-            user=cleaned_dict.get("user"),
+            user=user,
             ip_address=cleaned_dict.get("ip_address"),
             application=cleaned_dict.get("application"),
             environment=cleaned_dict.get("environment"),

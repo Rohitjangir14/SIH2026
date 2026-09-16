@@ -1,0 +1,37 @@
+# =============================================================================
+# ULPF Demonstration & Hackathon Evaluation Compose File
+# (EXPLICIT DEMO ONLY — Uses SQLite & preconfigured credentials for 1-click evaluation)
+# To run: docker compose -f docker-compose.demo.yml up --build
+# For production deployment with PostgreSQL & enforced RBAC, use docker-compose.yml
+# =============================================================================
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ulpf-demo-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./ulpf.db
+      - SECRET_KEY=ulpf_demo_temporary_eval_jwt_key_sih2026
+      - ULPF_ADMIN_PASSWORD=admin123
+      - REQUIRE_AUTH=false
+      - ENABLE_DATA_MASKING=true
+      - ULPF_ENABLE_SALTED_PSEUDONYMIZATION=false
+    volumes:
+      - ./backend/ulpf.db:/app/ulpf.db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ulpf-demo-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

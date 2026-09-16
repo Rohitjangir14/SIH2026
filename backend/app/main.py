@@ -66,6 +66,25 @@ async def lifespan(app: FastAPI):
                     )
                 )
 
+        # Restore active custom parser plugins from database into runtime memory
+        from app.parsers.regex_parser import RegexParser
+        custom_res = await session.execute(
+            select(ParserPlugin).filter(
+                ParserPlugin.is_builtin == False,
+                ParserPlugin.status == "ACTIVE"
+            )
+        )
+        for cp in custom_res.scalars().all():
+            target_key = cp.format_key or cp.name
+            if cp.regex_pattern and target_key not in parser_registry.list_keys():
+                parser_registry.register(
+                    RegexParser(
+                        custom_pattern=cp.regex_pattern,
+                        name=cp.name,
+                        format_key=target_key,
+                    )
+                )
+
         await session.commit()
 
     # Security check on SECRET_KEY

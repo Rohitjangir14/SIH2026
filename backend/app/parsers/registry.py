@@ -43,6 +43,14 @@ class ParserRegistry:
         """Returns all registered parsers."""
         return list(self._parsers.values())
 
+    def list_keys(self) -> List[str]:
+        """Returns all registered format keys."""
+        return list(self._parsers.keys())
+
+    def list_available(self) -> List[str]:
+        """Returns all registered format keys and names."""
+        return list(self._parsers.keys()) + [p.name for p in self._parsers.values()]
+
     def list_metadata(self) -> List[Dict]:
         """Returns metadata list for API exposition."""
         return [p.get_metadata() for p in self._parsers.values()]

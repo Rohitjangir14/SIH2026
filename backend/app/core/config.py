@@ -49,9 +49,10 @@ class Settings(BaseSettings):
     SALTED_PII_SECRET: str = os.getenv("ULPF_SALTED_PII_SECRET", "ulpf_enterprise_audit_salt_2026")
     
     # Authentication & Access Control
-    REQUIRE_AUTH: bool = False
+    REQUIRE_AUTH: bool = os.getenv("ULPF_REQUIRE_AUTH", os.getenv("REQUIRE_AUTH", "false")).lower() in ("true", "1", "yes")
     INITIAL_ADMIN_USERNAME: str = os.getenv("ULPF_ADMIN_USERNAME", "admin")
     INITIAL_ADMIN_PASSWORD: str = os.getenv("ULPF_ADMIN_PASSWORD", "admin123")
+    ENABLE_SALTED_PSEUDONYMIZATION: bool = os.getenv("ULPF_ENABLE_SALTED_PSEUDONYMIZATION", "false").lower() in ("true", "1", "yes")
     
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

@@ -6,6 +6,8 @@ from app.core.database import get_db
 from app.models.processed_log import ProcessedLog
 from app.models.raw_log import RawLog
 from app.models.job import ProcessingJob
+from app.models.user import User
+from app.api.auth import get_current_user
 from app.schemas.analytics import (
     AnalyticsSummary,
     SourceDistributionItem,
@@ -17,7 +19,10 @@ router = APIRouter(prefix="/analytics", tags=["Analytics & Reporting"])
 
 
 @router.get("/summary", response_model=AnalyticsSummary)
-async def get_summary_metrics(db: AsyncSession = Depends(get_db)):
+async def get_summary_metrics(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     # Total raw ingested logs
     total_raw_res = await db.execute(select(func.count(RawLog.id)))
     total_logs = total_raw_res.scalar() or 0
@@ -66,7 +71,10 @@ async def get_summary_metrics(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/by-source", response_model=List[SourceDistributionItem])
-async def get_logs_by_source(db: AsyncSession = Depends(get_db)):
+async def get_logs_by_source(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     res = await db.execute(
         select(ProcessedLog.source_type, func.count(ProcessedLog.id))
         .group_by(ProcessedLog.source_type)
@@ -86,7 +94,10 @@ async def get_logs_by_source(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/by-severity", response_model=List[SeverityDistributionItem])
-async def get_logs_by_severity(db: AsyncSession = Depends(get_db)):
+async def get_logs_by_severity(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     color_map = {
         "CRITICAL": "#a855f7", # Purple
         "ERROR": "#ef4444",    # Red
@@ -117,7 +128,10 @@ async def get_logs_by_severity(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/timeline", response_model=List[TimelinePoint])
-async def get_timeline(db: AsyncSession = Depends(get_db)):
+async def get_timeline(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     # Returns recent logs grouped or distributed
     res = await db.execute(
         select(ProcessedLog.timestamp, ProcessedLog.severity)
@@ -157,6 +171,7 @@ async def execute_stress_benchmark(num_records: int = 5000):
 @router.post("/templates")
 async def mine_log_templates(
     limit: int = 500,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """

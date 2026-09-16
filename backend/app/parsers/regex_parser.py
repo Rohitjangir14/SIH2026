@@ -17,8 +17,9 @@ class RegexParser(BaseParser):
         re.IGNORECASE
     )
 
-    def __init__(self, custom_pattern: Optional[str] = None, name: str = "Generic Regex Parser"):
+    def __init__(self, custom_pattern: Optional[str] = None, name: str = "Generic Regex Parser", format_key: Optional[str] = None):
         self._name = name
+        self._format_key = format_key or "regex"
         self.custom_pattern_str = custom_pattern
         self.compiled_pattern = re.compile(custom_pattern) if custom_pattern else self.GENERIC_PATTERN
 
@@ -28,7 +29,7 @@ class RegexParser(BaseParser):
 
     @property
     def format_key(self) -> str:
-        return "regex"
+        return self._format_key
 
     def detect(self, sample_line: str) -> float:
         line = sample_line.strip()

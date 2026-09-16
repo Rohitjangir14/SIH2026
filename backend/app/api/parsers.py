@@ -8,6 +8,8 @@ from app.parsers.regex_parser import RegexParser
 from app.models.plugin import ParserPlugin
 from app.processing.cleaner import data_cleaner
 from app.processing.normalizer import log_normalizer
+from app.models.user import User
+from app.api.auth import require_analyst, get_current_user
 from app.schemas.plugin import (
     ParserPluginResponse,
     ParserPluginCreate,
@@ -79,7 +81,11 @@ async def test_parser_sandbox(payload: ParserTestRequest):
 
 
 @router.post("", response_model=ParserPluginResponse)
-async def create_custom_parser(plugin_in: ParserPluginCreate, db: AsyncSession = Depends(get_db)):
+async def create_custom_parser(
+    plugin_in: ParserPluginCreate,
+    current_user: User = Depends(require_analyst),
+    db: AsyncSession = Depends(get_db),
+):
     """
     Registers a new custom regex parser plugin.
     """
@@ -107,6 +113,7 @@ async def create_custom_parser(plugin_in: ParserPluginCreate, db: AsyncSession =
         custom_parser = RegexParser(
             custom_pattern=plugin_in.regex_pattern,
             name=plugin_in.name,
+            format_key=plugin_in.format_key,
         )
         parser_registry.register(custom_parser)
 

@@ -1,3 +1,8 @@
+# =============================================================================
+# ULPF Production Deployment Compose File
+# Enforces: Production PostgreSQL 15, Mandatory Authentication, Masking & HMAC Salt
+# Note: For zero-config local hackathon demo, use docker-compose.demo.yml
+# =============================================================================
 version: '3.8'
 
 services:
@@ -9,12 +14,16 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite+aiosqlite:///./ulpf.db
-      - SECRET_KEY=${SECRET_KEY:-ulpf_default_dev_jwt_key_sih_2026}
-      - ULPF_ADMIN_PASSWORD=${ULPF_ADMIN_PASSWORD:-admin123}
-      - REQUIRE_AUTH=${REQUIRE_AUTH:-false}
-    volumes:
-      - ./backend/ulpf.db:/app/ulpf.db
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-ulpf_user}:${POSTGRES_PASSWORD:-ulpf_secure_prod_2026}@postgres:5432/${POSTGRES_DB:-ulpf_db}
+      - SECRET_KEY=${SECRET_KEY:-ulpf_prod_enterprise_jwt_signing_key_secure_2026}
+      - ULPF_ADMIN_PASSWORD=${ULPF_ADMIN_PASSWORD:-AdminSecure2026!Prod}
+      - REQUIRE_AUTH=true
+      - ENABLE_DATA_MASKING=true
+      - ULPF_SALTED_PII_SECRET=${ULPF_SALTED_PII_SECRET:-ulpf_prod_enterprise_hmac_secret_salt}
+      - ULPF_ENABLE_SALTED_PSEUDONYMIZATION=true
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend:
@@ -28,19 +37,23 @@ services:
       - backend
     restart: unless-stopped
 
-  # Optional PostgreSQL profile for production database
   postgres:
     image: postgres:15-alpine
     container_name: ulpf-postgres
-    profiles: ["production"]
     environment:
-      POSTGRES_USER: ulpf_user
-      POSTGRES_PASSWORD: ulpf_password
-      POSTGRES_DB: ulpf_db
+      POSTGRES_USER: ${POSTGRES_USER:-ulpf_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ulpf_secure_prod_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-ulpf_db}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ulpf_user} -d ${POSTGRES_DB:-ulpf_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
   pgdata:

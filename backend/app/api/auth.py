@@ -1,7 +1,9 @@
+import uuid
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import (
     verify_password,
@@ -18,26 +20,37 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    token: Optional[str] = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User:
     if not token:
-        # Default mock admin user for convenient testing/demo if no token provided
-        result = await db.execute(select(User).filter(User.username == "admin"))
+        if settings.REQUIRE_AUTH:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required. Please provide a valid Bearer token.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        # Demo mode when REQUIRE_AUTH is false: unauthenticated caller gets limited viewer context
+        result = await db.execute(select(User).filter(User.username == "demo_viewer"))
         user = result.scalars().first()
-        if user:
-            return user
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        if not user:
+            user = User(
+                id=str(uuid.uuid4()),
+                username="demo_viewer",
+                email="viewer@ulpf.internal",
+                password_hash=get_password_hash("demo123"),
+                role=UserRole.VIEWER.value,
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+        return user
 
     payload = decode_access_token(token)
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication token",
+            detail="Invalid or expired authentication token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -48,7 +61,7 @@ async def get_current_user(
     result = await db.execute(select(User).filter(User.username == username))
     user = result.scalars().first()
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 
 
@@ -85,6 +98,7 @@ def require_roles(*allowed_roles: str):
 
 
 require_admin = require_roles(UserRole.ADMIN.value)
+require_analyst = require_roles(UserRole.ADMIN.value, UserRole.ANALYST.value)
 
 
 @router.post("/register", response_model=TokenResponse)
