@@ -29,23 +29,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
       <div className="flex h-14 items-center justify-between px-6 w-full">
         {/* Brand & Platform Identity */}
         <div
-          className="flex items-center gap-3 cursor-pointer select-none"
+          className="flex items-center gap-2.5 cursor-pointer select-none"
           onClick={() => onNavigate('dashboard')}
         >
-          <div className="h-8 w-8 rounded-lg overflow-hidden border border-blue-500/40 shadow-sm flex items-center justify-center bg-[#090d15] shrink-0">
-            <img src="/logo.png" alt="ULPF Logo" className="h-full w-full object-cover" />
+          <div className="h-8 w-8 rounded flex items-center justify-center shrink-0">
+            <img src="/logo.png" alt="ULPF Logo" className="h-full w-full object-contain" />
           </div>
 
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-base text-slate-100 tracking-tight">
-                ULPF
-              </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 font-mono">
-                v1.0.0
-              </span>
-            </div>
-          </div>
+          <span className="font-bold text-base text-slate-100 tracking-tight">
+            ULPF
+          </span>
         </div>
 
         {/* Center Live Tickers (Clean, Subdued Corporate) */}
