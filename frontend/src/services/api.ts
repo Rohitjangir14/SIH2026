@@ -35,6 +35,14 @@ export async function fetchTimeline(): Promise<TimelinePoint[]> {
   return res.json();
 }
 
+export async function runStressBenchmark(num_records: number = 5000): Promise<any> {
+  const res = await fetch(`${API_BASE}/analytics/benchmark?num_records=${num_records}`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error('Failed to run stress benchmark');
+  return res.json();
+}
+
 export interface LogFilterParams {
   query?: string;
   severity?: string;

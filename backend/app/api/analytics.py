@@ -140,3 +140,15 @@ async def get_timeline(db: AsyncSession = Depends(get_db)):
         TimelinePoint(time_bucket=k, count=v["total"], error_count=v["errors"])
         for k, v in list(buckets.items())[:12]
     ]
+
+
+@router.post("/benchmark")
+async def execute_stress_benchmark(num_records: int = 5000):
+    """
+    Executes a real-time high-throughput stress test across heterogeneous log formats
+    and returns exact throughput (logs/sec), latency (microseconds), detection accuracy,
+    and PII redaction metrics.
+    """
+    from app.benchmarks.benchmark_runner import run_benchmark
+    clamped_records = max(500, min(num_records, 25000))
+    return run_benchmark(clamped_records)

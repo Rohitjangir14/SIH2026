@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class LogSourceCreate(BaseModel):
@@ -10,6 +10,8 @@ class LogSourceCreate(BaseModel):
 
 
 class LogSourceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     source_type: str
@@ -17,6 +19,3 @@ class LogSourceResponse(BaseModel):
     api_key: str
     status: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True

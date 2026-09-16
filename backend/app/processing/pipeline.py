@@ -105,10 +105,12 @@ class ProcessingPipeline:
         processed_count = 0
         failed_count = 0
 
-        # 3. Process Each Line Individually
-        for line in lines:
-            # Stage 2: Store Raw Log (Never lose raw data!)
+        # 3. Process Each Line Individually (Chunked Flush for Enterprise Throughput)
+        BATCH_CHUNK_SIZE = 250
+        for idx, line in enumerate(lines, 1):
+            raw_id = str(uuid.uuid4())
             raw_record = RawLog(
+                id=raw_id,
                 source_id=source_name,
                 job_id=job.id,
                 file_name=file_name,
@@ -117,7 +119,6 @@ class ProcessingPipeline:
                 processing_status="PENDING",
             )
             db.add(raw_record)
-            await db.flush()
 
             try:
                 # Stage 4: Parse Raw Log
@@ -143,7 +144,7 @@ class ProcessingPipeline:
                 # Stage 9: Store Normalized Output
                 processed_record = ProcessedLog(
                     id=enriched_schema.id,
-                    raw_log_id=raw_record.id,
+                    raw_log_id=raw_id,
                     job_id=job.id,
                     timestamp=enriched_schema.timestamp,
                     severity=enriched_schema.severity.value,
@@ -169,7 +170,7 @@ class ProcessingPipeline:
                     failed_count += 1
                     # Store validation error details
                     val_err = ValidationErrorRecord(
-                        raw_log_id=raw_record.id,
+                        raw_log_id=raw_id,
                         job_id=job.id,
                         raw_content=line,
                         error_type="SCHEMA_VALIDATION_ERROR",
@@ -182,13 +183,17 @@ class ProcessingPipeline:
                 raw_record.processing_status = "FAILED"
                 failed_count += 1
                 val_err = ValidationErrorRecord(
-                    raw_log_id=raw_record.id,
+                    raw_log_id=raw_id,
                     job_id=job.id,
                     raw_content=line,
                     error_type="PARSE_ERROR",
                     error_details={"exception": str(ex), "parser": parser.name if parser else "None"},
                 )
                 db.add(val_err)
+
+            # Flush every 250 records to prevent holding excessive uncommitted buffers
+            if idx % BATCH_CHUNK_SIZE == 0:
+                await db.flush()
 
         # 4. Finalize Job Status
         job.processed_records = processed_count

@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class JobCreate(BaseModel):
@@ -12,6 +12,8 @@ class JobCreate(BaseModel):
 
 
 class JobResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     source: str
     file_name: Optional[str] = None
@@ -26,6 +28,3 @@ class JobResponse(BaseModel):
     duration_ms: float
     error_message: Optional[str] = None
     success_rate: float = Field(0.0, description="Percentage of records successfully parsed and validated")
-
-    class Config:
-        from_attributes = True

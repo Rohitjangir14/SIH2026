@@ -67,6 +67,13 @@ async def lifespan(app: FastAPI):
 
         await session.commit()
 
+    # Security check on SECRET_KEY
+    if "insecure" in settings.SECRET_KEY or "change_in_production" in settings.SECRET_KEY:
+        import logging
+        logging.getLogger("uvicorn.error").warning(
+            "[SECURITY NOTICE] Using default development SECRET_KEY. For production deployment, configure the SECRET_KEY environment variable."
+        )
+
     yield
 
 
@@ -79,10 +86,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware with explicit origins & local port regex (Standard W3C compliant with credentials)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

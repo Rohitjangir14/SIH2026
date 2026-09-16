@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class SeverityEnum(str, Enum):
@@ -22,6 +22,8 @@ class UniversalLogSchema(BaseModel):
     """
     Universal Log Schema standardizing heterogeneous log outputs.
     """
+    model_config = ConfigDict(from_attributes=True)
+
     id: str = Field(..., description="Unique UUID for the log record")
     timestamp: datetime = Field(..., description="ISO-8601 UTC timestamp")
     source: LogSourceInfo = Field(..., description="Source system information")
@@ -37,14 +39,10 @@ class UniversalLogSchema(BaseModel):
     environment: Optional[str] = Field(default=None, description="Environment e.g. production, staging")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Arbitrary additional parsed key-values")
 
-    class Config:
-        from_attributes = True
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat()
-        }
-
 
 class ProcessedLogResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     raw_log_id: Optional[str] = None
     job_id: Optional[str] = None
@@ -63,9 +61,6 @@ class ProcessedLogResponse(BaseModel):
     is_valid: bool = True
     created_at: datetime
     raw_content: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class LogQueryFilter(BaseModel):

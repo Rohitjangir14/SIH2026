@@ -39,3 +39,15 @@ async def test_parsers_list():
         assert "json" in keys
         assert "apache" in keys
         assert "syslog" in keys
+
+
+@pytest.mark.asyncio
+async def test_benchmark_endpoint():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post("/api/v1/analytics/benchmark?num_records=500")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total_records_tested"] == 500
+        assert data["pipeline_throughput_logs_per_sec"] > 1000
+        assert data["success_rate_percent"] == 100.0
