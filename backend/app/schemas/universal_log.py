@@ -39,6 +39,34 @@ class UniversalLogSchema(BaseModel):
     environment: Optional[str] = Field(default=None, description="Environment e.g. production, staging")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Arbitrary additional parsed key-values")
 
+    # OCSF (Open Cybersecurity Schema Framework) & ECS Alignment
+    class_uid: Optional[int] = Field(default=1001, description="OCSF Class UID (e.g. 1001 for System Activity)")
+    category_uid: Optional[int] = Field(default=1, description="OCSF Category UID")
+    ocsf_class: Optional[str] = Field(default="system_activity", description="OCSF Event Class Name")
+    network: Optional[Dict[str, Any]] = Field(default=None, description="ECS/OCSF Network Endpoint details")
+    device: Optional[Dict[str, Any]] = Field(default=None, description="ECS/OCSF Device details")
+
+    def to_ocsf_dict(self) -> Dict[str, Any]:
+        """Serializes canonical record into hierarchical OCSF schema."""
+        return {
+            "version": "1.1.0",
+            "class_uid": self.class_uid,
+            "category_uid": self.category_uid,
+            "class_name": self.ocsf_class,
+            "time": self.timestamp.isoformat(),
+            "severity": self.severity.value,
+            "message": self.message,
+            "metadata": {
+                "id": self.id,
+                "original_time": self.timestamp.isoformat(),
+                "product": {"name": "ULPF", "version": "1.0.0"},
+                **self.metadata,
+            },
+            "src_endpoint": {"ip": self.ip_address} if self.ip_address else None,
+            "actor": {"user": {"name": self.user}} if self.user else None,
+            "device": {"hostname": self.host} if self.host else None,
+        }
+
 
 class ProcessedLogResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

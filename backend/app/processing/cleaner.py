@@ -1,5 +1,8 @@
 import re
-from typing import Dict, Any, Tuple
+import hmac
+import hashlib
+from typing import Dict, Any, Tuple, Optional
+from app.core.config import settings
 
 
 def is_luhn_valid(num_str: str) -> bool:
@@ -28,17 +31,33 @@ class DataCleaner:
     1. Trims extraneous whitespace and unprintable control characters.
     2. Strips duplicate spaces.
     3. Handles null/empty field conversions.
-    4. Redacts sensitive credentials (passwords, tokens, API keys, bearer auth, and Luhn-validated credit cards).
+    4. Redacts sensitive credentials (passwords, tokens, Basic/Bearer auth, API keys).
+    5. Redacts PII: Luhn-validated credit cards, emails, phone numbers, and SSNs.
+    6. Supports salted HMAC-SHA256 pseudonymization.
     """
 
-    # Keyword-scoped patterns for passwords, tokens, API keys
+    # Keyword-scoped patterns for passwords, tokens, API keys, HTTP Basic auth
     CREDENTIAL_PATTERNS = [
         # Passwords e.g. password=secret, pwd: "xyz"
         (re.compile(r'(?i)\b(password|passwd|pwd|secret)\s*[:=]\s*([^\s,;"]+|"[^"]*")'), r'\1=********'),
         # Bearer tokens / JWTs
         (re.compile(r'(?i)\b(bearer\s+)[a-zA-Z0-9_\-\.]{20,}'), r'\1[REDACTED_JWT_TOKEN]'),
+        # HTTP Basic Auth header: Authorization: Basic dXNlcjpwYXNz
+        (re.compile(r'(?i)\b(authorization\s*:\s*basic\s+)[a-zA-Z0-9+/=]{8,}'), r'\1[REDACTED_BASIC_AUTH]'),
+        # Generic / short access tokens, session tokens, client secrets
+        (re.compile(r'(?i)\b(access_token|refresh_token|id_token|session_token|private_key|client_secret)\s*[:=]\s*([^\s,;"]+|"[^"]*")'), r'\1=[REDACTED_SECRET]'),
         # Generic API keys e.g. api_key=sk_live_...
         (re.compile(r'(?i)\b(api[_\-]?key|access[_\-]?key|auth[_\-]?token)\s*[:=]\s*([^\s,;"]+|"[^"]*")'), r'\1=[REDACTED_API_KEY]'),
+    ]
+
+    # PII patterns: Email, US SSN, Phone numbers
+    PII_PATTERNS = [
+        # Email addresses
+        (re.compile(r'(?i)\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'), '[REDACTED_EMAIL]'),
+        # US Social Security Number: 123-45-6789
+        (re.compile(r'(?<!\d)\b(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b(?!\d)'), '[REDACTED_SSN]'),
+        # North American & International Phone numbers (guarded against IPs e.g. 192.168.1.45, timestamps, and order numbers)
+        (re.compile(r'(?<![0-9\.\-])(?:\+?1[-.\s]?)?\(?[2-9]\d{2}\)?[-.\s]?[2-9]\d{2}[-.\s]?\d{4}(?![0-9\.\-])'), '[REDACTED_PHONE]'),
     ]
 
     # Keyword-scoped credit card pattern e.g. card="4532...", cc_number=...
@@ -65,9 +84,20 @@ class DataCleaner:
         cleaned = re.sub(r'[ \t]+', ' ', cleaned)
         return cleaned.strip()
 
-    def mask_sensitive_data(self, text: str) -> Tuple[str, bool]:
+    def pseudonymize_identifier(self, identifier: str, salt: Optional[str] = None) -> str:
         """
-        Masks passwords, API keys, tokens, and Luhn-verified credit cards.
+        Creates a consistent, irreversible pseudonym for an identifier using HMAC-SHA256.
+        Enables cross-log correlation without storing plaintext PII (GDPR Art. 32).
+        """
+        if not identifier:
+            return identifier
+        secret_salt = salt or settings.SALTED_PII_SECRET
+        h = hmac.new(secret_salt.encode("utf-8"), identifier.encode("utf-8"), hashlib.sha256)
+        return f"pseudo_{h.hexdigest()[:16]}"
+
+    def mask_sensitive_data(self, text: str, redact_pii: bool = True) -> Tuple[str, bool]:
+        """
+        Masks passwords, API keys, Basic/Bearer auth, tokens, Luhn-verified cards, emails, phones, and SSNs.
         Guarantees that Windows SIDs, order IDs, and session IDs are never corrupted.
         Returns: (masked_text, was_masked_boolean)
         """
@@ -77,12 +107,20 @@ class DataCleaner:
         masked = text
         was_masked = False
 
-        # 1. Mask standard credential patterns (passwords, JWTs, API keys)
+        # 1. Mask standard credential patterns (passwords, JWTs, Basic auth, API keys, tokens)
         for pattern, replacement in self.CREDENTIAL_PATTERNS:
             new_text, count = pattern.subn(replacement, masked)
             if count > 0:
                 masked = new_text
                 was_masked = True
+
+        # 2. Mask PII patterns (emails, SSNs, phone numbers)
+        if redact_pii:
+            for pattern, replacement in self.PII_PATTERNS:
+                new_text, count = pattern.subn(replacement, masked)
+                if count > 0:
+                    masked = new_text
+                    was_masked = True
 
         # 2. Mask keyword-scoped credit card fields
         def _replace_keyword_card(m: re.Match) -> str:

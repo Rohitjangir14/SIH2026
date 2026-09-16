@@ -48,6 +48,31 @@ To establish why ULPF is unique and competitive for enterprise deployment and ha
 
 ---
 
+## Implementation Status & Architecture Matrix
+
+To maintain rigorous technical integrity and audit transparency, the table below documents the exact implementation state of ULPF components:
+
+| Capability Domain | Component / Specification | Implementation Status | Verified Path / Mechanism |
+| :--- | :--- | :--- | :--- |
+| **Universal Ingestion** | Multi-line Pretty-printed JSON & Arrays | ✅ **Fully Implemented** | `app/detection/format_detector.py`, `app/processing/pipeline.py` (`_extract_records`) |
+| **Universal Ingestion** | Apache, Nginx, Linux Syslog, CSV, Windows XML | ✅ **Fully Implemented** | `app/parsers/` (6 deterministic parsers + dynamic regex engine) |
+| **Zero-Loss Storage** | Immutable Raw Log Archive + FK Linkage | ✅ **Fully Implemented** | `app/models/raw_log.py`, `app/models/log_record.py` (`raw_log_id`) |
+| **Pipeline Replay** | Replay Raw Job Streams through New Rules | ✅ **Fully Implemented** | `POST /api/v1/jobs/{job_id}/replay` (`app/api/jobs.py`) |
+| **AI / Heuristic Mining**| Drain Tree Algorithm Template Extraction | ✅ **Fully Implemented** | `app/parsers/drain_miner.py`, `POST /api/v1/analytics/templates` |
+| **Data Protection** | Regex PII Masking (Tokens, Basic Auth, Email, Phone) | ✅ **Fully Implemented** | `app/processing/cleaner.py` (`DataCleaner`) |
+| **Data Protection** | Luhn Algorithm Validated Credit Card Redaction | ✅ **Fully Implemented** | `app/processing/cleaner.py` (`_luhn_checksum`) |
+| **Data Protection** | Salted HMAC-SHA256 Pseudonymization | ✅ **Fully Implemented** | `app/processing/cleaner.py` (`pseudonymize_identifier`) |
+| **Data Protection** | Pipeline Masking Configuration Toggle | ✅ **Fully Implemented** | `settings.ENABLE_DATA_MASKING` + per-request override |
+| **Audit & Integrity** | Timestamp Degradation Tracking (Inferred Flag) | ✅ **Fully Implemented** | `app/processing/normalizer.py` (`timestamp_quality: "DEGRADED_INFERRED"`) |
+| **Access Control (RBAC)**| Privilege Escalation Protection (No Public Admin) | ✅ **Fully Implemented** | `app/schemas/auth.py`, `app/api/auth.py` (`require_admin`) |
+| **Schema Harmonization**| OCSF v1.3 Aligned Schema Export | ✅ **Fully Implemented** | `app/schemas/universal_log.py` (`to_ocsf_dict()`, `class_uid`) |
+| **GeoIP Enrichment** | Fallback GeoIP (Simulated / Heuristic) | ⚠️ **Phase 1 Implemented** | `app/processing/normalizer.py` (Local IP ranges + simulated geo) |
+| **GeoIP Enrichment** | MaxMind GeoLite2 MMDB Binary Integration | 🚀 *Roadmap (Phase 2)* | Requires MaxMind Commercial License / MMDB download in CI |
+| **Distributed Scaling** | Multi-Worker Celery / Kafka Cluster | 🚀 *Roadmap (Phase 2)* | Architecture documented; AsyncIO SQLite/PostgreSQL used for zero-config demo |
+| **AI LLM Copilot** | Cloud / Local LLM Parser Generator Gateway | 🚀 *Roadmap (Phase 2)* | LLM prompt templates designed; Drain algorithm handles local offline mining |
+
+---
+
 ## 2. Universal Schema Standard: OCSF & ECS Harmonization
 
 A core failure of past log parsers is producing arbitrary, unstructured JSON keys (e.g., one parser creates `{"client_ip": "..."}`, another creates `{"src_ip": "..."}`, a third creates `{"ip": "..."}`).

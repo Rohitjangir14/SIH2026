@@ -25,13 +25,14 @@ async def lifespan(app: FastAPI):
 
     # Seed default data if empty
     async with AsyncSessionLocal() as session:
-        # Check admin user
-        user_res = await session.execute(select(User).filter(User.username == "admin"))
+        # Check admin user (configured via settings/environment variables)
+        admin_username = settings.INITIAL_ADMIN_USERNAME
+        user_res = await session.execute(select(User).filter(User.username == admin_username))
         if not user_res.scalars().first():
             admin_user = User(
-                username="admin",
-                email="admin@ulpf.internal",
-                password_hash=get_password_hash("admin123"),
+                username=admin_username,
+                email=f"{admin_username}@ulpf.internal",
+                password_hash=get_password_hash(settings.INITIAL_ADMIN_PASSWORD),
                 role=UserRole.ADMIN.value,
             )
             session.add(admin_user)

@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     
     # Sensitive Data Redaction
     ENABLE_DATA_MASKING: bool = True
+    SALTED_PII_SECRET: str = os.getenv("ULPF_SALTED_PII_SECRET", "ulpf_enterprise_audit_salt_2026")
+    
+    # Authentication & Access Control
+    REQUIRE_AUTH: bool = False
+    INITIAL_ADMIN_USERNAME: str = os.getenv("ULPF_ADMIN_USERNAME", "admin")
+    INITIAL_ADMIN_PASSWORD: str = os.getenv("ULPF_ADMIN_PASSWORD", "admin123")
     
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

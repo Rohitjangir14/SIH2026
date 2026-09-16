@@ -40,36 +40,91 @@ class FormatDetector:
         preview_sample = "\n".join(lines[:3])
         candidates: List[DetectionCandidate] = []
 
-        # 1. Check for JSON array or JSON lines
+        # 1. Check for JSON array, pretty-printed JSON, or JSON lines
+        content_stripped = sample_content.strip()
         stripped_first = lines[0].strip()
-        is_json_array = stripped_first.startswith("[") or sample_content.strip().startswith("[")
-        is_json_object = stripped_first.startswith("{") and stripped_first.endswith("}")
 
-        if is_json_array:
-            try:
-                parsed_json = json.loads(sample_content.strip())
-                if isinstance(parsed_json, list) and len(parsed_json) > 0 and isinstance(parsed_json[0], dict):
-                    candidates.append(DetectionCandidate(
-                        format="json",
-                        parser_name="JSON Parser",
-                        confidence=0.99,
-                        reason="Valid JSON Array of structured log objects detected"
-                    ))
-            except Exception:
-                pass
+        # Direct full parse check
+        is_full_json = False
+        try:
+            full_parsed = json.loads(content_stripped)
+            is_full_json = True
+            if isinstance(full_parsed, list) and len(full_parsed) > 0 and isinstance(full_parsed[0], dict):
+                candidates.append(DetectionCandidate(
+                    format="json",
+                    parser_name="JSON Parser",
+                    confidence=0.99,
+                    reason="Valid JSON Array of structured log objects detected"
+                ))
+            elif isinstance(full_parsed, dict):
+                candidates.append(DetectionCandidate(
+                    format="json",
+                    parser_name="JSON Parser",
+                    confidence=0.99,
+                    reason="Valid single JSON structured log object detected"
+                ))
+        except Exception:
+            pass
 
-        if is_json_object:
-            try:
-                parsed_obj = json.loads(stripped_first)
-                if isinstance(parsed_obj, dict):
-                    candidates.append(DetectionCandidate(
-                        format="json",
-                        parser_name="JSON Parser",
-                        confidence=0.98,
-                        reason="Valid JSON object log line detected"
-                    ))
-            except Exception:
-                pass
+        # If not full JSON (e.g. truncated sample from larger array), check streaming decode
+        if not is_full_json:
+            # Array start check
+            if content_stripped.startswith("["):
+                content_after_bracket = content_stripped.lstrip("[").strip()
+                if content_after_bracket:
+                    try:
+                        obj, _ = json.JSONDecoder().raw_decode(content_after_bracket)
+                        if isinstance(obj, dict):
+                            candidates.append(DetectionCandidate(
+                                format="json",
+                                parser_name="JSON Parser",
+                                confidence=0.99,
+                                reason="Valid JSON Array with structured objects detected (streaming/truncated)"
+                            ))
+                    except Exception:
+                        # Regex signature check for JSON array of objects: e.g. [ { "timestamp": ...
+                        if re.search(r'^\s*\[\s*\{', content_stripped):
+                            candidates.append(DetectionCandidate(
+                                format="json",
+                                parser_name="JSON Parser",
+                                confidence=0.95,
+                                reason="JSON Array syntax pattern identified with nested object keys"
+                            ))
+
+            # Pretty-printed multi-line JSON object check
+            elif content_stripped.startswith("{"):
+                try:
+                    obj, _ = json.JSONDecoder().raw_decode(content_stripped)
+                    if isinstance(obj, dict):
+                        candidates.append(DetectionCandidate(
+                            format="json",
+                            parser_name="JSON Parser",
+                            confidence=0.98,
+                            reason="Pretty-printed multi-line JSON object detected"
+                        ))
+                except Exception:
+                    # Partial / truncated object check e.g. { "timestamp": ...
+                    if re.search(r'^\s*\{\s*"[A-Za-z0-9_]+"\s*:', content_stripped):
+                        candidates.append(DetectionCandidate(
+                            format="json",
+                            parser_name="JSON Parser",
+                            confidence=0.95,
+                            reason="Structured JSON key-value syntax detected"
+                        ))
+
+            # Newline-Delimited JSON (NDJSON) check on individual lines
+            elif stripped_first.startswith("{"):
+                try:
+                    obj = json.loads(stripped_first)
+                    if isinstance(obj, dict):
+                        candidates.append(DetectionCandidate(
+                            format="json",
+                            parser_name="JSON Parser",
+                            confidence=0.98,
+                            reason="Valid Newline-Delimited JSON (NDJSON) line detected"
+                        ))
+                except Exception:
+                    pass
 
         # 2. Check each registered parser's detect() score over the first sample lines
         parsers = parser_registry.get_all()

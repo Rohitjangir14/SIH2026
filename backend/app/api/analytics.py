@@ -152,3 +152,32 @@ async def execute_stress_benchmark(num_records: int = 5000):
     from app.benchmarks.benchmark_runner import run_benchmark
     clamped_records = max(500, min(num_records, 25000))
     return run_benchmark(clamped_records)
+
+
+@router.post("/templates")
+async def mine_log_templates(
+    limit: int = 500,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Applies the Drain tree log clustering algorithm on recent logs to discover
+    recurring parametric templates with <*> wildcards.
+    """
+    from app.parsers.drain_miner import DrainMiner
+    res = await db.execute(
+        select(ProcessedLog.message)
+        .order_by(ProcessedLog.timestamp.desc())
+        .limit(min(limit, 2000))
+    )
+    messages = res.scalars().all()
+
+    miner = DrainMiner()
+    for msg in messages:
+        if msg:
+            miner.add_log_message(msg)
+
+    return {
+        "analyzed_records": len(messages),
+        "cluster_count": len(miner.clusters),
+        "templates": miner.get_templates(),
+    }

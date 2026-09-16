@@ -17,6 +17,7 @@ from app.processing.cleaner import data_cleaner
 from app.processing.normalizer import log_normalizer
 from app.processing.enricher import log_enricher
 from app.processing.validator import log_validator
+from app.core.config import settings
 from app.schemas.universal_log import UniversalLogSchema
 
 
@@ -27,6 +28,78 @@ class ProcessingPipeline:
     Normalize -> Enrich -> Validate -> Processed/Error Store.
     """
 
+    def _extract_records(
+        self,
+        raw_content: str,
+        detected_format: str,
+    ) -> Tuple[List[str], str]:
+        """
+        Extracts individual log records from raw content.
+        Robustly handles:
+        - Pretty-printed JSON arrays ([ {...}, {...} ])
+        - Single multi-line pretty-printed JSON objects ({ ... })
+        - Newline-Delimited JSON (NDJSON)
+        - Streaming / concatenated JSON objects
+        - Line-oriented formats (Syslog, Apache, Nginx, CSV, Windows, Custom)
+        """
+        content_stripped = raw_content.strip()
+        if not content_stripped:
+            return [], detected_format
+
+        # 1. If format is detected as JSON or content strongly looks like JSON structure
+        if detected_format == "json" or content_stripped.startswith(("[", "{")):
+            # Case A: Full JSON parse (Array or single Object)
+            try:
+                parsed_json = json.loads(content_stripped)
+                if isinstance(parsed_json, list):
+                    records = [
+                        json.dumps(item) if isinstance(item, (dict, list)) else str(item)
+                        for item in parsed_json
+                    ]
+                    return records, "json"
+                elif isinstance(parsed_json, dict):
+                    return [json.dumps(parsed_json)], "json"
+            except Exception:
+                pass
+
+            # Case B: Streaming JSON decode (for multi-object or truncated/formatted streams)
+            try:
+                records = []
+                decoder = json.JSONDecoder()
+                s = content_stripped
+                if s.startswith("["):
+                    s = s[1:].strip()
+                idx = 0
+                while idx < len(s):
+                    while idx < len(s) and s[idx] in " \t\r\n,]":
+                        idx += 1
+                    if idx >= len(s):
+                        break
+                    obj, end_idx = decoder.raw_decode(s, idx)
+                    records.append(json.dumps(obj) if isinstance(obj, (dict, list)) else str(obj))
+                    idx = end_idx
+                if records:
+                    return records, "json"
+            except Exception:
+                pass
+
+            # Case C: Check NDJSON line-by-line
+            ndjson_records = []
+            non_empty_lines = [l.strip() for l in raw_content.splitlines() if l.strip()]
+            for line in non_empty_lines:
+                try:
+                    obj = json.loads(line)
+                    if isinstance(obj, dict):
+                        ndjson_records.append(json.dumps(obj))
+                except Exception:
+                    pass
+            if ndjson_records and len(ndjson_records) >= max(1, len(non_empty_lines) * 0.5):
+                return ndjson_records, "json"
+
+        # 2. Line-oriented splitting fallback
+        lines = [line.strip() for line in raw_content.splitlines() if line.strip()]
+        return lines, detected_format
+
     async def execute(
         self,
         db: AsyncSession,
@@ -35,6 +108,7 @@ class ProcessingPipeline:
         file_name: Optional[str] = None,
         forced_format: Optional[str] = None,
         job_id: Optional[str] = None,
+        mask_data: Optional[bool] = None,
     ) -> ProcessingJob:
         start_time = time.time()
         
@@ -52,22 +126,28 @@ class ProcessingPipeline:
             db.add(job)
             await db.flush()
 
-        # Split content into individual records
-        content_stripped = raw_content.strip()
-        lines: List[str] = []
-
-        # Check if entire content is a JSON array
-        if content_stripped.startswith("[") and content_stripped.endswith("]"):
-            try:
-                json_array = json.loads(content_stripped)
-                if isinstance(json_array, list):
-                    lines = [json.dumps(item) for item in json_array]
-            except Exception:
-                lines = [line.strip() for line in raw_content.splitlines() if line.strip()]
+        # 2. Format Detection (Performed on full or generous sample)
+        if forced_format and forced_format != "auto":
+            detected_format = forced_format
+            parser = parser_registry.get(forced_format) or parser_registry.get("regex")
+            detection_reason = f"Forced format selection: {forced_format}"
         else:
-            lines = [line.strip() for line in raw_content.splitlines() if line.strip()]
+            sample_for_detect = raw_content[:8000]
+            detection_resp = format_detector.detect(sample_for_detect, filename=file_name)
+            detected_format = detection_resp.detected_format
+            parser = parser_registry.get(detected_format) or parser_registry.get("regex")
+            detection_reason = detection_resp.reason
 
+        # 3. Semantic Record Extraction (Supports pretty JSON arrays, single JSON objects, NDJSON, and lines)
+        lines, final_format = self._extract_records(raw_content, detected_format)
+        if final_format != detected_format:
+            detected_format = final_format
+            parser = parser_registry.get(detected_format) or parser_registry.get("regex")
+
+        job.detected_format = detected_format
+        job.parser_used = parser.name if parser else "Generic Regex Parser"
         job.total_records = len(lines)
+
         if job.total_records == 0:
             job.status = "COMPLETED"
             job.completed_at = datetime.now(timezone.utc)
@@ -75,25 +155,10 @@ class ProcessingPipeline:
             await db.commit()
             return job
 
-        # 2. Format Detection
-        if forced_format and forced_format != "auto":
-            detected_format = forced_format
-            parser = parser_registry.get(forced_format) or parser_registry.get("regex")
-            detection_reason = f"Forced format selection: {forced_format}"
-        else:
-            detection_resp = format_detector.detect(raw_content[:4000], filename=file_name)
-            detected_format = detection_resp.detected_format
-            parser = parser_registry.get(detected_format) or parser_registry.get("regex")
-            detection_reason = detection_resp.reason
-
-        job.detected_format = detected_format
-        job.parser_used = parser.name if parser else "Generic Regex Parser"
-
         # Check if CSV parser needs header detection
         if detected_format == "csv" and lines:
             header_line = lines[0]
             if any(col in header_line.lower() for col in ["time", "level", "message", "severity", "user"]):
-                # First line is a header!
                 headers = [h.strip() for h in header_line.split(",")]
                 from app.parsers.csv_parser import CSVParser
                 csv_p = CSVParser(headers=headers)
@@ -104,8 +169,9 @@ class ProcessingPipeline:
 
         processed_count = 0
         failed_count = 0
+        effective_masking = settings.ENABLE_DATA_MASKING if mask_data is None else mask_data
 
-        # 3. Process Each Line Individually (Chunked Flush for Enterprise Throughput)
+        # 4. Process Each Record (Chunked Flush for Enterprise Throughput)
         BATCH_CHUNK_SIZE = 250
         for idx, line in enumerate(lines, 1):
             raw_id = str(uuid.uuid4())
@@ -124,8 +190,8 @@ class ProcessingPipeline:
                 # Stage 4: Parse Raw Log
                 parsed_fields = parser.parse(line)
 
-                # Stage 5: Clean and Mask Sensitive Data
-                cleaned_fields = data_cleaner.clean_record(parsed_fields, mask_data=True)
+                # Stage 5: Clean and Mask Sensitive Data (Honors configuration)
+                cleaned_fields = data_cleaner.clean_record(parsed_fields, mask_data=effective_masking)
 
                 # Stage 6: Normalize into Universal Log Schema
                 normalized_schema = log_normalizer.normalize_record(

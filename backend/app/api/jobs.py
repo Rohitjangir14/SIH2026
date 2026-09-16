@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from app.core.database import get_db
@@ -78,3 +78,59 @@ async def get_job_details(id: str, db: AsyncSession = Depends(get_db)):
             for e in errors
         ],
     }
+
+
+@router.post("/{id}/replay", response_model=JobResponse)
+async def replay_job(
+    id: str,
+    forced_format: Optional[str] = Query(None, description="Optionally override parser format on replay"),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Forensic Replay Engine:
+    Re-processes all immutable RawLog records from an existing batch job
+    through the latest pipeline/parser versions.
+    """
+    from app.models.raw_log import RawLog
+    from app.processing.pipeline import pipeline_runner
+
+    job_res = await db.execute(select(ProcessingJob).filter(ProcessingJob.id == id))
+    original_job = job_res.scalars().first()
+    if not original_job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    raw_res = await db.execute(
+        select(RawLog.raw_content)
+        .filter(RawLog.job_id == id)
+        .order_by(RawLog.received_at.asc())
+    )
+    raw_lines = raw_res.scalars().all()
+    if not raw_lines:
+        raise HTTPException(status_code=400, detail="No raw logs found for this job to replay")
+
+    combined_content = "\n".join(raw_lines)
+    new_job = await pipeline_runner.execute(
+        db=db,
+        raw_content=combined_content,
+        source_name=f"{original_job.source}_replay",
+        file_name=f"replay_{original_job.file_name or 'stream'}",
+        forced_format=forced_format or original_job.detected_format,
+    )
+
+    rate = round((new_job.processed_records / new_job.total_records * 100) if new_job.total_records > 0 else 0.0, 2)
+    return JobResponse(
+        id=new_job.id,
+        source=new_job.source,
+        file_name=new_job.file_name,
+        detected_format=new_job.detected_format,
+        parser_used=new_job.parser_used,
+        total_records=new_job.total_records,
+        processed_records=new_job.processed_records,
+        failed_records=new_job.failed_records,
+        status=new_job.status,
+        started_at=new_job.started_at,
+        completed_at=new_job.completed_at,
+        duration_ms=new_job.duration_ms,
+        error_message=new_job.error_message,
+        success_rate=rate,
+    )

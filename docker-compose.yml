@@ -10,7 +10,9 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=sqlite+aiosqlite:///./ulpf.db
-      - SECRET_KEY=ulpf_super_secret_jwt_key_sih_2026
+      - SECRET_KEY=${SECRET_KEY:-ulpf_default_dev_jwt_key_sih_2026}
+      - ULPF_ADMIN_PASSWORD=${ULPF_ADMIN_PASSWORD:-admin123}
+      - REQUIRE_AUTH=${REQUIRE_AUTH:-false}
     volumes:
       - ./backend/ulpf.db:/app/ulpf.db
     restart: unless-stopped
