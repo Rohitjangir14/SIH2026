@@ -1,0 +1,5 @@
+2026-09-13 10:32:21 [Security] EventID=4625 Level=Information Host=DC-PROD-01 Message="An account failed to log on. Subject: Security ID: S-1-0-0, Account Name: -, Logon Type: 3, Account For Which Logon Failed: Account Name: ronak, Failure Reason: Unknown user name or bad password."
+2026-09-13 10:33:05 [Security] EventID=4624 Level=Information Host=DC-PROD-01 Message="An account was successfully logged on. Subject: Security ID: S-1-5-18, Account Name: DC-PROD-01$, Target: Account Name: admin, Logon Type: 2."
+2026-09-13 10:34:40 [System] EventID=7036 Level=Information Host=APP-SRV-02 Message="The Windows Event Log service entered the running state."
+2026-09-13 10:36:15 [Application] EventID=1000 Level=Error Host=APP-SRV-02 Message="Faulting application name: ULPFWorker.exe, version: 1.0.0.0, time stamp: 0x6283a1b4, faulting module name: ntdll.dll, exception code: 0xc0000005"
+2026-09-13 10:37:50 [Security] EventID=4720 Level=Warning Host=DC-PROD-01 Message="A user account was created. Target Account: Security ID: S-1-5-21-397955417-626881126-18844144-1010, Account Name: testuser"

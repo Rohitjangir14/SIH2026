@@ -1,0 +1,4 @@
+[2026-09-13 10:32:21] ERROR app.security: Authentication failed for user=ronak with password=SuperSecretPassword123! from ip=192.168.1.45
+[2026-09-13 10:33:10] WARNING app.api: Request failed with authorization=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.token_payload.signature and api_key=sk_live_51M089421AABBCC
+[2026-09-13 10:34:02] INFO app.checkout: Customer alex@example.com placed order with credit_card=4111-2222-3333-4444
+[2026-09-13 10:35:15] CRITICAL app.infra: DB credentials leak prevented: user=db_admin secret=P@ssw0rd2026! host=db.internal.net

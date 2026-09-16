@@ -1,0 +1,6 @@
+timestamp,severity,service,message,user,ip_address,environment
+2026-09-13 10:32:21,ERROR,auth_svc,Database timeout during credential lookup,ronak,192.168.1.45,production
+2026-09-13 10:33:00,INFO,billing_svc,Invoice INV-2026-001 generated successfully,acme_corp,10.0.1.20,production
+2026-09-13 10:34:15,WARN,cache_mgr,Redis cache miss ratio exceeded 40%,system,127.0.0.1,production
+2026-09-13 10:35:30,CRITICAL,order_svc,Payment provider gateway responded with 503 Service Unavailable,alex,172.16.10.4,production
+2026-09-13 10:36:45,DEBUG,audit_trail,User opened security compliance report,sec_officer,10.0.2.55,production

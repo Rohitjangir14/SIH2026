@@ -1,0 +1,46 @@
+[
+  {
+    "timestamp": "2026-09-13T10:32:21.412Z",
+    "log_level": "ERROR",
+    "service": "auth-service",
+    "event_type": "authentication_failure",
+    "message": "Failed login attempt detected from remote IP",
+    "source": "aws-lambda-auth",
+    "user": "ronak",
+    "ip_address": "192.168.1.45",
+    "request_id": "c92a1841-f592-4d2a-a951-873b889a9c21",
+    "environment": "production"
+  },
+  {
+    "timestamp": "2026-09-13T10:33:05.100Z",
+    "log_level": "INFO",
+    "service": "payment-gateway",
+    "event_type": "transaction_completed",
+    "message": "Stripe charge succeeded for customer cus_99214 amount=4999 currency=USD",
+    "source": "ecs-payment-cluster",
+    "user": "customer_882",
+    "ip_address": "10.0.0.12",
+    "request_id": "d109b832-1111-4f9b-b01a-829910acb920",
+    "environment": "production"
+  },
+  {
+    "timestamp": "2026-09-13T10:34:12.871Z",
+    "log_level": "WARNING",
+    "service": "inventory-api",
+    "event_type": "stock_depleted",
+    "message": "SKU-48192 inventory dropped below threshold alert level=2",
+    "source": "k8s-pod-inventory-849",
+    "user": "system",
+    "environment": "staging"
+  },
+  {
+    "timestamp": "2026-09-13T10:35:50.000Z",
+    "log_level": "CRITICAL",
+    "service": "database-proxy",
+    "event_type": "circuit_breaker_opened",
+    "message": "Connection pool exhausted (500/500 active connections) to RDS Aurora primary",
+    "source": "aws-rds-proxy",
+    "host": "rds-cluster-prod.internal",
+    "environment": "production"
+  }
+]

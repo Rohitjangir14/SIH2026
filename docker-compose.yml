@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ulpf-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./ulpf.db
+      - SECRET_KEY=ulpf_super_secret_jwt_key_sih_2026
+    volumes:
+      - ./backend/ulpf.db:/app/ulpf.db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ulpf-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Optional PostgreSQL profile for production database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ulpf-postgres
+    profiles: ["production"]
+    environment:
+      POSTGRES_USER: ulpf_user
+      POSTGRES_PASSWORD: ulpf_password
+      POSTGRES_DB: ulpf_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

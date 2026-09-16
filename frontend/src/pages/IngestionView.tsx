@@ -1,0 +1,411 @@
+import React, { useState, useEffect } from 'react';
+import {
+  UploadCloud,
+  FileText,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Play,
+  RotateCcw,
+  Zap,
+  ArrowRight,
+  ShieldAlert,
+} from 'lucide-react';
+import { detectFormat, uploadLogFile, pasteLogText } from '../services/api';
+import { DetectionResult, ProcessingJob } from '../types';
+
+interface IngestionViewProps {
+  onNavigate: (tab: string) => void;
+}
+
+export const IngestionView: React.FC<IngestionViewProps> = ({ onNavigate }) => {
+  const [activeMode, setActiveMode] = useState<'upload' | 'paste'>('paste');
+  const [file, setFile] = useState<File | null>(null);
+  const [pastedText, setPastedText] = useState<string>('');
+  const [sourceName, setSourceName] = useState<string>('prod_gateway');
+  const [forcedFormat, setForcedFormat] = useState<string>('auto');
+
+  const [detection, setDetection] = useState<DetectionResult | null>(null);
+  const [detecting, setDetecting] = useState<boolean>(false);
+  const [processing, setProcessing] = useState<boolean>(false);
+  const [jobResult, setJobResult] = useState<ProcessingJob | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Pre-loaded samples
+  const SAMPLE_LOGS: Record<string, { label: string; format: string; text: string }> = {
+    apache: {
+      label: 'Apache Web Access',
+      format: 'apache',
+      text: `192.168.1.45 - ronak [13/Sep/2026:10:32:21 +0000] "POST /api/v1/auth/login HTTP/1.1" 401 128 "-" "Mozilla/5.0"
+10.0.0.12 - - [13/Sep/2026:10:33:02 +0000] "GET /dashboard/metrics HTTP/1.1" 200 5234 "https://example.com/dashboard" "Mozilla/5.0"
+203.0.113.50 - hacker [13/Sep/2026:10:37:42 +0000] "GET /etc/passwd HTTP/1.1" 403 298 "-" "sqlmap/1.4"`,
+    },
+    syslog: {
+      label: 'Linux Syslog (sshd)',
+      format: 'syslog',
+      text: `Sep 13 10:32:21 server01 sshd[2841]: Failed password for invalid user ronak from 192.168.1.45 port 54821 ssh2
+Sep 13 10:33:02 server01 sudo: ubuntu : TTY=pts/0 ; PWD=/home/ubuntu ; USER=root ; COMMAND=/bin/systemctl restart nginx
+Sep 13 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible SYN flooding on port 80. Sending cookies.`,
+    },
+    nginx: {
+      label: 'Nginx Error Log',
+      format: 'nginx',
+      text: `2026/09/13 10:32:21 [error] 14202#14202: *1092 open() "/usr/share/nginx/html/favicon.ico" failed (2: No such file or directory), client: 192.168.1.45, server: api.internal, request: "GET /favicon.ico HTTP/1.1", host: "api.internal"
+2026/09/13 10:35:10 [crit] 14202#14202: *1120 SSL_do_handshake() failed, client: 198.51.100.99, server: 0.0.0.0:443`,
+    },
+    windows: {
+      label: 'Windows Event Log',
+      format: 'windows',
+      text: `2026-09-13 10:32:21 [Security] EventID=4625 Level=Information Host=DC-PROD-01 Message="An account failed to log on. Subject: Security ID: S-1-0-0, Account Name: -, Logon Type: 3, Account For Which Logon Failed: Account Name: ronak, Failure Reason: Unknown user name or bad password."
+2026-09-13 10:33:05 [Security] EventID=4624 Level=Information Host=DC-PROD-01 Message="An account was successfully logged on. Target: Account Name: admin, Logon Type: 2."`,
+    },
+    aws_json: {
+      label: 'AWS CloudWatch JSON',
+      format: 'json',
+      text: `[
+  {
+    "timestamp": "2026-09-13T10:32:21.412Z",
+    "log_level": "ERROR",
+    "service": "auth-service",
+    "event_type": "authentication_failure",
+    "message": "Failed login attempt detected from remote IP",
+    "user": "ronak",
+    "ip_address": "192.168.1.45",
+    "environment": "production"
+  },
+  {
+    "timestamp": "2026-09-13T10:35:50.000Z",
+    "log_level": "CRITICAL",
+    "service": "database-proxy",
+    "event_type": "circuit_breaker_opened",
+    "message": "Connection pool exhausted (500/500 active connections) to RDS Aurora primary",
+    "host": "rds-cluster-prod.internal",
+    "environment": "production"
+  }
+]`,
+    },
+    csv: {
+      label: 'CSV Application Logs',
+      format: 'csv',
+      text: `timestamp,severity,service,message,user,ip_address,environment
+2026-09-13 10:32:21,ERROR,auth_svc,Database timeout during credential lookup,ronak,192.168.1.45,production
+2026-09-13 10:34:15,WARN,cache_mgr,Redis cache miss ratio exceeded 40%,system,127.0.0.1,production`,
+    },
+    sensitive: {
+      label: 'Sensitive Log (Masking Test)',
+      format: 'regex',
+      text: `[2026-09-13 10:32:21] ERROR app.security: Authentication failed for user=ronak with password=SuperSecretPassword123! from ip=192.168.1.45
+[2026-09-13 10:33:10] WARNING app.api: Request failed with authorization=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.token_payload.signature and api_key=sk_live_51M089421AABBCC`,
+    },
+  };
+
+  // Trigger format detection whenever input changes
+  useEffect(() => {
+    const content = activeMode === 'paste' ? pastedText : (file ? file.name : '');
+    if (!content || content.length < 10) {
+      setDetection(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setDetecting(true);
+        if (activeMode === 'paste') {
+          const res = await detectFormat(pastedText);
+          setDetection(res);
+        } else if (file) {
+          const textPreview = await file.slice(0, 3000).text();
+          const res = await detectFormat(textPreview, file.name);
+          setDetection(res);
+        }
+      } catch (e) {
+        console.error('Detection error', e);
+      } finally {
+        setDetecting(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [pastedText, file, activeMode]);
+
+  const handleSelectSample = (sampleKey: string) => {
+    const sample = SAMPLE_LOGS[sampleKey];
+    if (sample) {
+      setActiveMode('paste');
+      setPastedText(sample.text);
+      setSourceName(`sample_${sampleKey}`);
+    }
+  };
+
+  const handleStartPipeline = async () => {
+    setErrorMsg(null);
+    setJobResult(null);
+
+    if (activeMode === 'paste' && !pastedText.trim()) {
+      setErrorMsg('Please paste some log text or select a sample dataset.');
+      return;
+    }
+    if (activeMode === 'upload' && !file) {
+      setErrorMsg('Please select a file to upload.');
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      let res: ProcessingJob;
+      if (activeMode === 'paste') {
+        res = await pasteLogText(pastedText, sourceName, forcedFormat);
+      } else {
+        res = await uploadLogFile(file!, sourceName, forcedFormat);
+      }
+      setJobResult(res);
+    } catch (e: any) {
+      setErrorMsg(e.message || 'Processing failed');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+          <UploadCloud className="h-6 w-6 text-cyan-400" />
+          Log Ingestion Studio
+        </h1>
+        <p className="text-sm text-slate-400 mt-1">
+          Ingest raw logs from any system &bull; Automatic format detection &bull; Immediate normalization pipeline
+        </p>
+      </div>
+
+      {/* 1-Click Sample Preloader Buttons */}
+      <div className="glass-panel p-4 rounded-2xl">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-300 mb-2.5">
+          <Zap className="h-4 w-4 text-amber-400" />
+          Quick Test Datasets (1-Click Pre-load):
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(SAMPLE_LOGS).map(([key, item]) => (
+            <button
+              key={key}
+              onClick={() => handleSelectSample(key)}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-100 hover:bg-cyan-500/20 text-slate-200 hover:text-cyan-300 border border-white/10 hover:border-cyan-500/30 transition-all flex items-center gap-1.5"
+            >
+              <FileText className="h-3.5 w-3.5 text-cyan-400" />
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Mode Switcher Tabs */}
+      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+        <button
+          onClick={() => setActiveMode('paste')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            activeMode === 'paste'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <FileText className="h-4 w-4" />
+          Direct Paste Raw Log
+        </button>
+        <button
+          onClick={() => setActiveMode('upload')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            activeMode === 'upload'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <UploadCloud className="h-4 w-4" />
+          Upload Log File (.log, .txt, .json, .csv)
+        </button>
+      </div>
+
+      {/* Main Input Box */}
+      <div className="glass-panel p-6 rounded-2xl space-y-4">
+        {activeMode === 'paste' ? (
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
+              Raw Log Content (Multi-line or JSON Array)
+            </label>
+            <textarea
+              rows={8}
+              value={pastedText}
+              onChange={(e) => setPastedText(e.target.value)}
+              placeholder="Paste raw log lines here... e.g. Sep 13 10:32:21 server01 sshd: Failed password for user ronak"
+              className="w-full bg-[#070b13] border border-white/10 rounded-xl p-3.5 text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/60 leading-relaxed"
+            ></textarea>
+          </div>
+        ) : (
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
+              Select Log File
+            </label>
+            <div className="border-2 border-dashed border-white/10 hover:border-cyan-500/40 rounded-2xl p-8 text-center transition-all bg-[#070b13]/50">
+              <UploadCloud className="h-10 w-10 text-cyan-400 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-slate-200">
+                {file ? file.name : 'Drag and drop your log file here, or click to browse'}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">Supports .log, .txt, .json, .csv, and syslog exports</p>
+              <input
+                type="file"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="mt-4 text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/15 file:text-cyan-300 hover:file:bg-cyan-500/25 cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Configuration Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Source System Identifier
+            </label>
+            <input
+              type="text"
+              value={sourceName}
+              onChange={(e) => setSourceName(e.target.value)}
+              placeholder="e.g. prod_nginx_edge, server01, aws_lambda"
+              className="w-full bg-[#070b13] border border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500/60"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Parser Plugin Selection
+            </label>
+            <select
+              value={forcedFormat}
+              onChange={(e) => setForcedFormat(e.target.value)}
+              className="w-full bg-[#070b13] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/60"
+            >
+              <option value="auto">Auto-Detect Format (Recommended)</option>
+              <option value="syslog">Linux Syslog (RFC 3164 / 5424)</option>
+              <option value="apache">Apache Web Server Access Log</option>
+              <option value="nginx">Nginx Access & Error Log</option>
+              <option value="json">Structured JSON / AWS CloudWatch</option>
+              <option value="csv">CSV Delimited Log</option>
+              <option value="windows">Windows Event Log</option>
+              <option value="regex">Generic Regex Bracketed Log</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Live Auto-Detection Banner */}
+        {detecting ? (
+          <div className="p-3.5 rounded-xl bg-surface-100/60 border border-white/10 flex items-center gap-3 text-xs text-slate-400">
+            <Sparkles className="h-4 w-4 text-cyan-400 animate-spin" />
+            Analyzing log signatures, structure, and syntax patterns...
+          </div>
+        ) : detection ? (
+          <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-950/40 via-surface-100/70 to-indigo-950/40 border border-cyan-500/30">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-2.5 w-2.5 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+                </span>
+                <span className="text-xs font-bold text-white">
+                  Detected Format:{' '}
+                  <span className="text-cyan-400 uppercase font-mono tracking-wider ml-1">
+                    {detection.detected_format}
+                  </span>
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  {Math.round(detection.confidence * 100)}% Confidence
+                </span>
+              </div>
+              <span className="text-xs text-slate-300 font-medium">
+                Parser: <span className="text-white font-semibold">{detection.recommended_parser}</span>
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
+              {detection.reason}
+            </p>
+          </div>
+        ) : null}
+
+        {/* Error Alert */}
+        {errorMsg && (
+          <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300 font-medium">
+            <AlertCircle className="h-4 w-4 text-rose-400" />
+            {errorMsg}
+          </div>
+        )}
+
+        {/* Submit Pipeline Button */}
+        <div className="pt-2 flex items-center justify-end">
+          <button
+            onClick={handleStartPipeline}
+            disabled={processing}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-bold shadow-lg shadow-cyan-500/25 transition active:scale-95 disabled:opacity-50"
+          >
+            {processing ? (
+              <>
+                <Sparkles className="h-4 w-4 animate-spin" />
+                Executing Pipeline...
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4 fill-current" />
+                Start Processing Pipeline
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Execution Results Modal / Card */}
+      {jobResult && (
+        <div className="glass-panel p-6 rounded-2xl border-emerald-500/30 bg-emerald-950/10 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5 text-emerald-400 font-bold text-sm">
+              <CheckCircle2 className="h-5 w-5" />
+              Batch Execution Complete: Job {jobResult.id.slice(0, 8)}
+            </div>
+            <span className="text-xs font-mono text-slate-400">
+              Duration: <span className="text-white font-bold">{jobResult.duration_ms} ms</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div className="p-3 rounded-xl bg-surface-100/80 border border-white/5">
+              <div className="text-xs text-slate-400">Total Input</div>
+              <div className="text-lg font-bold text-white mt-1">{jobResult.total_records}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-surface-100/80 border border-white/5">
+              <div className="text-xs text-slate-400">Successfully Normalized</div>
+              <div className="text-lg font-bold text-emerald-400 mt-1">{jobResult.processed_records}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-surface-100/80 border border-white/5">
+              <div className="text-xs text-slate-400">Validation Errors</div>
+              <div className="text-lg font-bold text-rose-400 mt-1">{jobResult.failed_records}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-surface-100/80 border border-white/5">
+              <div className="text-xs text-slate-400">Success Rate</div>
+              <div className="text-lg font-bold text-cyan-400 mt-1">{jobResult.success_rate}%</div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-xs text-slate-400">
+              Raw logs preserved immutably &bull; Sensitive data masked &bull; Normalized into Universal Schema
+            </span>
+            <button
+              onClick={() => onNavigate('explorer')}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition"
+            >
+              Open in Universal Log Explorer
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

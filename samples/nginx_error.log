@@ -1,0 +1,4 @@
+2026/09/13 10:32:21 [error] 14202#14202: *1092 open() "/usr/share/nginx/html/favicon.ico" failed (2: No such file or directory), client: 192.168.1.45, server: api.internal, request: "GET /favicon.ico HTTP/1.1", host: "api.internal"
+2026/09/13 10:33:45 [warn] 14202#14202: *1104 upstream server temporarily disabled while connecting to upstream, client: 10.0.0.12, server: api.internal, request: "POST /api/v1/heavy-query HTTP/1.1", upstream: "http://127.0.0.1:8000/api/v1/heavy-query", host: "api.internal"
+2026/09/13 10:35:10 [crit] 14202#14202: *1120 SSL_do_handshake() failed (SSL: error:14094412:SSL routines:ssl3_read_bytes:sslv3 alert bad certificate), client: 198.51.100.99, server: 0.0.0.0:443
+2026/09/13 10:36:04 [error] 14202#14202: *1135 connect() to 10.0.4.5:9000 failed (111: Connection refused) while connecting to upstream, client: 172.16.0.88, server: api.internal, request: "GET /metrics HTTP/1.1", upstream: "fastcgi://10.0.4.5:9000", host: "api.internal"
