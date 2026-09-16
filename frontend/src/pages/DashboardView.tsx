@@ -5,19 +5,14 @@ import {
   AlertTriangle,
   Clock,
   ArrowUpRight,
+  ArrowRight,
   TrendingUp,
   Cpu,
   Server,
   ShieldAlert,
-  ShieldCheck,
-  Terminal,
   RefreshCw,
-  Zap,
   ChevronRight,
   X,
-  Sparkles,
-  Info,
-  Lock,
 } from 'lucide-react';
 import { AnalyticsSummary, SourceDistribution, SeverityDistribution, ProcessingJob } from '../types';
 import { fetchAnalyticsSummary, fetchSourceDistribution, fetchSeverityDistribution, fetchJobs } from '../services/api';
@@ -30,7 +25,6 @@ interface PipelineStep {
   step: string;
   name: string;
   subtitle: string;
-  gradient: string;
   detail: {
     title: string;
     objective: string;
@@ -79,7 +73,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       step: '01',
       name: 'Ingestion Layer',
       subtitle: 'Multi-Source Feeds',
-      gradient: 'from-blue-600 to-cyan-500',
       detail: {
         title: 'Step 1: Universal Ingestion Layer',
         objective: 'Accept heterogeneous log streams via REST API, file batch upload, drag-and-drop, and network listeners.',
@@ -96,7 +89,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       step: '02',
       name: 'Raw Storage',
       subtitle: 'Immutable & Lossless',
-      gradient: 'from-cyan-500 to-teal-500',
       detail: {
         title: 'Step 2: Immutable Raw Storage Engine',
         objective: 'Persist original log payload verbatim prior to any parser or transformation execution.',
@@ -112,7 +104,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       step: '03',
       name: 'Format Detector',
       subtitle: 'Heuristic Scoring',
-      gradient: 'from-teal-500 to-emerald-500',
       detail: {
         title: 'Step 3: Multi-Signal Format Detection Engine',
         objective: 'Identify log source syntax automatically using structural analysis and signature matching.',
@@ -128,7 +119,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       step: '04',
       name: 'Parser Plugin',
       subtitle: 'Extensible Plugins',
-      gradient: 'from-emerald-500 to-indigo-500',
       detail: {
         title: 'Step 4: Extensible Parser Plugin Engine',
         objective: 'Dissect raw log strings into isolated semantic key-value fields using decoupled parser plugins.',
@@ -144,7 +134,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       step: '05',
       name: 'Data Cleaner',
       subtitle: 'Luhn & Masking',
-      gradient: 'from-indigo-500 to-violet-500',
       detail: {
         title: 'Step 5: Sensitive Data Redaction & Luhn Verification',
         objective: 'Sanitize credit cards, Bearer tokens, API keys, and passwords before downstream storage.',
@@ -162,7 +151,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       step: '06',
       name: 'UTC Normalizer',
       subtitle: 'ISO-8601 Standard',
-      gradient: 'from-violet-500 to-purple-500',
       detail: {
         title: 'Step 6: Universal UTC Timestamp Normalization',
         objective: 'Convert heterogeneous timestamp formats across timezones into unified UTC ISO-8601 strings.',
@@ -179,7 +167,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       step: '07',
       name: 'Enrichment',
       subtitle: 'GeoIP & Threat Tagging',
-      gradient: 'from-purple-500 to-fuchsia-500',
       detail: {
         title: 'Step 7: Metadata & Severity Enrichment Layer',
         objective: 'Harmonize non-standard log severities (ERR, warn, crit, 500 status) into standard levels.',
@@ -196,7 +183,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       step: '08',
       name: 'Universal Schema',
       subtitle: 'Canonical Delivery',
-      gradient: 'from-fuchsia-500 to-cyan-400',
       detail: {
         title: 'Step 8: Universal Log Schema Delivery',
         objective: 'Output standard JSON records aligned with OCSF and modern observability pipelines.',
@@ -212,271 +198,281 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Hero Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-5">
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-black tracking-tight text-white">
-              Universal Log Pre-processing Platform
+            <h1 className="text-xl font-bold tracking-tight text-white">
+              System Overview
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-xs font-bold tracking-wide">
+            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
               Live Pipeline Active
             </span>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
-            Zero-config format detection &bull; Sensitive data redaction &bull; Canonical Universal Log Schema
+          <p className="text-xs text-slate-400 mt-0.5">
+            Automatic format detection &bull; Sensitive data redaction &bull; Canonical Universal Schema
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <button
             onClick={loadData}
             disabled={loading}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-800 bg-slate-900/90 hover:bg-slate-850 text-xs font-semibold text-slate-200 transition active:scale-[0.98] shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-750 text-xs font-medium text-slate-300 transition active:scale-[0.98]"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-cyan-400' : ''}`} />
-            <span>Refresh Telemetry</span>
+            <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+            <span>Refresh</span>
           </button>
 
           <button
             onClick={() => onNavigate('ingestion')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-xs font-bold text-white shadow-md shadow-cyan-500/20 transition active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white transition active:scale-[0.98]"
           >
-            <ArrowUpRight className="h-4 w-4" />
-            <span>New Ingestion Run</span>
+            <ArrowUpRight className="h-3.5 w-3.5" />
+            <span>New Ingestion</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Metric Cards (Clean, Solid, Corporate) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Logs */}
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden border border-slate-800/80 hover:border-slate-700/80 transition-all">
+        <div className="glass-panel p-4 rounded-xl border border-slate-800">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Total Ingested Logs
             </span>
-            <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
-              <Layers className="h-4 w-4" />
+            <div className="h-7 w-7 rounded-md bg-blue-950/50 text-blue-400 flex items-center justify-center border border-blue-900/40">
+              <Layers className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
+          <div className="mt-2.5">
+            <div className="text-2xl font-bold text-white tracking-tight font-mono">
               {summary ? summary.total_logs.toLocaleString() : '—'}
             </div>
-            <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold text-[11px]">
-                <CheckCircle2 className="h-3 w-3" /> 100% Immutable
-              </span>
-              <span>raw storage</span>
+            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+              <span className="text-emerald-400 font-medium">100% Lossless</span>
+              <span>immutable storage</span>
             </p>
           </div>
         </div>
 
         {/* Success Rate */}
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden border border-slate-800/80 hover:border-slate-700/80 transition-all">
+        <div className="glass-panel p-4 rounded-xl border border-slate-800">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Validation Rate
             </span>
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-              <CheckCircle2 className="h-4 w-4" />
+            <div className="h-7 w-7 rounded-md bg-emerald-950/50 text-emerald-400 flex items-center justify-center border border-emerald-900/40">
+              <CheckCircle2 className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
+          <div className="mt-2.5">
+            <div className="text-2xl font-bold text-white tracking-tight font-mono">
               {summary ? `${summary.success_rate}%` : '—'}
             </div>
-            <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-              <span className="text-cyan-400 font-semibold">{summary?.processed_logs || 0}</span>
-              <span>valid ULS records</span>
+            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+              <span className="text-slate-300 font-medium">{summary?.processed_logs || 0}</span>
+              <span>valid records</span>
             </p>
           </div>
         </div>
 
         {/* Errors & Alerts */}
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden border border-slate-800/80 hover:border-slate-700/80 transition-all">
+        <div className="glass-panel p-4 rounded-xl border border-slate-800">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Security & Error Logs
             </span>
-            <div className="h-9 w-9 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20">
-              <AlertTriangle className="h-4 w-4" />
+            <div className="h-7 w-7 rounded-md bg-rose-950/50 text-rose-400 flex items-center justify-center border border-rose-900/40">
+              <AlertTriangle className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
+          <div className="mt-2.5">
+            <div className="text-2xl font-bold text-white tracking-tight font-mono">
               {summary ? (summary.error_logs + summary.critical_logs + summary.warning_logs).toLocaleString() : '—'}
             </div>
-            <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-              <span className="text-rose-400 font-semibold">{summary ? `${summary.error_rate}%` : '0%'}</span>
+            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+              <span className="text-rose-400 font-medium">{summary ? `${summary.error_rate}%` : '0%'}</span>
               <span>error frequency</span>
             </p>
           </div>
         </div>
 
         {/* Processing Latency */}
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden border border-slate-800/80 hover:border-slate-700/80 transition-all">
+        <div className="glass-panel p-4 rounded-xl border border-slate-800">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Avg Batch Duration
             </span>
-            <div className="h-9 w-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-              <Clock className="h-4 w-4" />
+            <div className="h-7 w-7 rounded-md bg-slate-800 text-slate-300 flex items-center justify-center border border-slate-700">
+              <Clock className="h-3.5 w-3.5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
+          <div className="mt-2.5">
+            <div className="text-2xl font-bold text-white tracking-tight font-mono">
               {summary ? `${summary.avg_processing_time_ms} ms` : '—'}
             </div>
-            <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
               <span>Across</span>
-              <span className="text-purple-300 font-semibold">{summary?.total_jobs || 0}</span>
+              <span className="text-slate-300 font-medium">{summary?.total_jobs || 0}</span>
               <span>pipeline jobs</span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Interactive Core Architecture Flow Visualization */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-800/80 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* 8-Stage Architecture Pipeline Section (Clean, No Rainbow Gradients) */}
+      <div className="glass-panel p-5 rounded-xl border border-slate-800 space-y-3.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <Cpu className="h-4 w-4 text-cyan-400" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <Cpu className="h-4 w-4 text-blue-400" />
               8-Stage Data Engineering Architecture
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Click any stage below to inspect its data processing guarantees, throughput, and algorithms
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Click any stage to view throughput metrics, processing algorithms, and technical guarantees
             </p>
           </div>
-          <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-900 text-cyan-300 border border-cyan-500/20">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
             Interactive Architecture
           </span>
         </div>
 
-        {/* Connected 8-Stage Flow Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 pt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
           {PIPELINE_STEPS.map((item, idx) => (
             <button
               key={idx}
               onClick={() => setSelectedStage(item)}
-              className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800/90 hover:border-cyan-500/40 text-left transition-all group flex flex-col justify-between hover:-translate-y-0.5 shadow-sm"
+              className="p-3 rounded-lg bg-slate-900/90 border border-slate-800 hover:border-slate-700 text-left transition-all group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold font-mono text-cyan-400">
+                  <span className="text-[10px] font-mono font-bold text-slate-400">
                     {item.step}
                   </span>
-                  <ChevronRight className="h-3 w-3 text-slate-400 group-hover:text-cyan-300 transition-colors" />
+                  <ChevronRight className="h-3 w-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
                 </div>
-                <div className="text-xs font-bold text-slate-100 group-hover:text-cyan-200 transition-colors truncate">
+                <div className="text-xs font-semibold text-slate-200 group-hover:text-white transition-colors truncate">
                   {item.name}
                 </div>
                 <div className="text-[10px] text-slate-400 mt-0.5 truncate">
                   {item.subtitle}
                 </div>
               </div>
-              <div className={`h-1 w-full mt-3 rounded-full bg-gradient-to-r ${item.gradient}`}></div>
+              <div className="h-0.5 w-full mt-2.5 rounded-full bg-slate-700 group-hover:bg-blue-500 transition-colors"></div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Distribution Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Source System Contributions */}
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800/80 flex flex-col justify-between">
+        <div className="glass-panel p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Server className="h-4 w-4 text-cyan-400" />
+            <div className="flex items-center justify-between mb-3.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <Server className="h-4 w-4 text-slate-400" />
                 Logs by Ingestion Source Format
               </h3>
-              <span className="text-xs text-slate-400 font-medium font-mono">
+              <span className="text-[11px] text-slate-400 font-mono">
                 {sources.length} active formats
               </span>
             </div>
 
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {sources.length > 0 ? (
                 sources.map((src, i) => (
-                  <div key={i} className="space-y-1.5">
+                  <div key={i} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-300 flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-cyan-400"></span>
+                      <span className="font-medium text-slate-300 flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
                         {src.source}
                       </span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-[11px]">
                         <span className="font-mono text-slate-400">{src.count} records</span>
-                        <span className="font-mono font-bold text-cyan-400">{src.percentage}%</span>
+                        <span className="font-mono font-semibold text-slate-200">{src.percentage}%</span>
                       </div>
                     </div>
-                    <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                    <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
                       <div
-                        className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full transition-all duration-500"
+                        className="h-full bg-blue-600 rounded-full transition-all duration-300"
                         style={{ width: `${src.percentage}%` }}
                       ></div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-xs text-slate-500">
-                  No log source data available. Ingest a log file to see distribution.
+                <div className="text-center py-6 text-xs text-slate-500">
+                  No log source data available.
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+          <div className="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>Supports Apache, Nginx, Syslog, Windows, JSON, CSV & Custom</span>
             <button
               onClick={() => onNavigate('explorer')}
-              className="text-cyan-400 hover:text-cyan-300 font-semibold"
+              className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1"
             >
-              Explore all &rarr;
+              <span>Explore logs</span>
+              <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         </div>
 
         {/* Severity Breakdown */}
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800/80 flex flex-col justify-between">
+        <div className="glass-panel p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-rose-400" />
+            <div className="flex items-center justify-between mb-3.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-slate-400" />
                 Normalized Severity Breakdown
               </h3>
-              <span className="text-xs text-slate-400 font-medium font-mono">Standardized Enums</span>
+              <span className="text-[11px] text-slate-400 font-mono">Standardized Enums</span>
             </div>
 
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {severities.length > 0 ? (
                 severities.map((sev, i) => {
                   const total = summary?.total_logs || 1;
                   const pct = Math.round((sev.count / total) * 100);
+                  
+                  // Muted, non-neon colors
+                  const mutedColors: Record<string, string> = {
+                    CRITICAL: '#9333ea', // Dark purple
+                    ERROR: '#e11d48',    // Deep rose
+                    WARNING: '#d97706',  // Warm amber
+                    INFO: '#2563eb',     // Corporate blue
+                    DEBUG: '#16a34a',    // Deep green
+                    UNKNOWN: '#64748b',  // Slate
+                  };
+                  const color = mutedColors[sev.severity] || '#64748b';
+
                   return (
-                    <div key={i} className="space-y-1.5">
+                    <div key={i} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-300 flex items-center gap-2">
+                        <span className="font-medium text-slate-300 flex items-center gap-2">
                           <span
-                            className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: sev.color }}
+                            className="h-1.5 w-1.5 rounded-full"
+                            style={{ backgroundColor: color }}
                           ></span>
                           {sev.severity}
                         </span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-[11px]">
                           <span className="font-mono text-slate-400">{sev.count} records</span>
-                          <span className="font-mono font-bold text-slate-200">{pct}%</span>
+                          <span className="font-mono font-semibold text-slate-200">{pct}%</span>
                         </div>
                       </div>
-                      <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                      <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
                         <div
-                          className="h-full rounded-full transition-all duration-500"
+                          className="h-full rounded-full transition-all duration-300"
                           style={{
                             width: `${pct}%`,
-                            backgroundColor: sev.color,
+                            backgroundColor: color,
                           }}
                         ></div>
                       </div>
@@ -484,95 +480,97 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                   );
                 })
               ) : (
-                <div className="text-center py-8 text-xs text-slate-500">
+                <div className="text-center py-6 text-xs text-slate-500">
                   No severity distribution data available.
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-            <span>Heterogeneous levels (ERR, SEVERE, warn, crit) normalized to standard enums</span>
+          <div className="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Harmonized into canonical severity hierarchy</span>
             <button
               onClick={() => onNavigate('analytics')}
-              className="text-cyan-400 hover:text-cyan-300 font-semibold"
+              className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1"
             >
-              Deep dive &rarr;
+              <span>Analytics details</span>
+              <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Recent Processing Executions Table */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-800/80">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-panel p-5 rounded-xl border border-slate-800">
+        <div className="flex items-center justify-between mb-3.5">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-indigo-400" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-slate-400" />
               Recent Processing Executions
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-400 mt-0.5">
               Batch processing runs, parser assignments, and validation rates
             </p>
           </div>
           <button
             onClick={() => onNavigate('jobs')}
-            className="text-xs font-semibold text-cyan-400 hover:text-cyan-300"
+            className="text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1"
           >
-            View all jobs ({recentJobs.length}) &rarr;
+            <span>View all ({recentJobs.length})</span>
+            <ArrowRight className="h-3 w-3" />
           </button>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/40 text-slate-400 font-semibold">
-                <th className="pb-3 px-3">Job ID</th>
-                <th className="pb-3 px-3">Source / File</th>
-                <th className="pb-3 px-3">Detected Format</th>
-                <th className="pb-3 px-3">Parser Plugin</th>
-                <th className="pb-3 px-3">Records (Total / Parsed)</th>
-                <th className="pb-3 px-3">Success Rate</th>
-                <th className="pb-3 px-3">Duration</th>
-                <th className="pb-3 px-3">Status</th>
+              <tr className="border-b border-slate-800 text-slate-400 font-semibold text-[11px]">
+                <th className="pb-2.5 px-3">Job ID</th>
+                <th className="pb-2.5 px-3">Source / File</th>
+                <th className="pb-2.5 px-3">Detected Format</th>
+                <th className="pb-2.5 px-3">Parser Plugin</th>
+                <th className="pb-2.5 px-3">Records</th>
+                <th className="pb-2.5 px-3">Success Rate</th>
+                <th className="pb-2.5 px-3">Duration</th>
+                <th className="pb-2.5 px-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50 text-slate-200">
+            <tbody className="divide-y divide-slate-800/60 text-slate-300">
               {recentJobs.length > 0 ? (
                 recentJobs.map((j) => (
-                  <tr key={j.id} className="hover:bg-slate-850/60 transition">
-                    <td className="py-3 px-3 font-mono text-cyan-400 font-semibold">
+                  <tr key={j.id} className="hover:bg-slate-800/40 transition">
+                    <td className="py-2.5 px-3 font-mono text-slate-200 font-medium">
                       {j.id.slice(0, 8)}
                     </td>
-                    <td className="py-3 px-3">
-                      <div className="font-semibold text-slate-200">{j.source}</div>
-                      <div className="text-[10px] text-slate-400">{j.file_name || 'raw_input'}</div>
+                    <td className="py-2.5 px-3">
+                      <div className="font-medium text-slate-200">{j.source}</div>
+                      <div className="text-[10px] text-slate-500">{j.file_name || 'raw_input'}</div>
                     </td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                    <td className="py-2.5 px-3">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono uppercase bg-slate-800 text-slate-300 border border-slate-700">
                         {j.detected_format || 'auto'}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-slate-300 font-medium">
+                    <td className="py-2.5 px-3 text-slate-400">
                       {j.parser_used || 'Generic Regex'}
                     </td>
-                    <td className="py-3 px-3 font-mono">
-                      {j.total_records} / <span className="text-emerald-400">{j.processed_records}</span>
+                    <td className="py-2.5 px-3 font-mono text-[11px]">
+                      {j.total_records} / <span className="text-slate-200">{j.processed_records}</span>
                     </td>
-                    <td className="py-3 px-3 font-mono font-bold text-emerald-400">
+                    <td className="py-2.5 px-3 font-mono font-semibold text-slate-200">
                       {j.success_rate}%
                     </td>
-                    <td className="py-3 px-3 font-mono text-slate-400">
+                    <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px]">
                       {j.duration_ms} ms
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-2.5 px-3">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
                           j.status === 'COMPLETED'
-                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                            ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/60'
                             : j.status === 'PARTIAL'
-                            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                            : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                            ? 'bg-amber-950/60 text-amber-300 border border-amber-800/60'
+                            : 'bg-rose-950/60 text-rose-300 border border-rose-800/60'
                         }`}
                       >
                         {j.status}
@@ -582,7 +580,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-6 text-center text-slate-500">
+                  <td colSpan={8} className="py-6 text-center text-slate-500 text-xs">
                     No processing jobs recorded yet.
                   </td>
                 </tr>
@@ -594,20 +592,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
       {/* Pipeline Stage Deep-Dive Modal */}
       {selectedStage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="glass-panel w-full max-w-2xl rounded-3xl p-6 border border-slate-700/80 shadow-2xl bg-[#0b101d] space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2.5">
-                <span className="text-xs font-mono font-bold text-cyan-400 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="glass-panel w-full max-w-xl rounded-xl p-5 border border-slate-700 shadow-2xl bg-[#111622] space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono font-bold text-slate-300 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700">
                   {selectedStage.step}
                 </span>
-                <h3 className="text-base font-bold text-white">
+                <h3 className="text-sm font-bold text-white">
                   {selectedStage.detail.title}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedStage(null)}
-                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-400 hover:text-white transition"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -617,43 +615,43 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               {selectedStage.detail.objective}
             </p>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+            <div className="grid grid-cols-2 gap-2.5 text-xs">
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
                   Throughput
                 </span>
-                <div className="font-mono font-bold text-cyan-300 mt-1">
+                <div className="font-mono font-medium text-slate-200 mt-0.5">
                   {selectedStage.detail.throughput}
                 </div>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                  Engineering Guarantee
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
+                  Guarantee
                 </span>
-                <div className="font-bold text-emerald-400 mt-1">
+                <div className="font-medium text-slate-200 mt-0.5">
                   {selectedStage.detail.guarantee}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2 pt-1">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 Technical Specifications
               </span>
-              <ul className="space-y-1.5">
+              <ul className="space-y-1">
                 {selectedStage.detail.specs.map((spec, sIdx) => (
-                  <li key={sIdx} className="text-xs text-slate-400 flex items-start gap-2">
-                    <span className="text-cyan-400 mt-0.5">&bull;</span>
+                  <li key={sIdx} className="text-xs text-slate-300 flex items-start gap-2">
+                    <span className="text-slate-500 mt-0.5">&bull;</span>
                     <span>{spec}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="pt-2 flex justify-end">
+            <div className="pt-2 flex justify-end border-t border-slate-800">
               <button
                 onClick={() => setSelectedStage(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition"
+                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition"
               >
                 Close
               </button>

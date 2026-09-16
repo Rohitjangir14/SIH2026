@@ -11,6 +11,7 @@ import {
   X,
   Layers,
   FileCode,
+  ArrowRight,
 } from 'lucide-react';
 import { fetchParsers, testParserSandbox, createCustomParser } from '../services/api';
 import { ParserPlugin } from '../types';
@@ -85,27 +86,27 @@ export const ParsersView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-5 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5">
-            <Code2 className="h-6 w-6 text-cyan-400" />
-            <h1 className="text-2xl font-black tracking-tight text-white">
+            <Code2 className="h-5 w-5 text-blue-500" />
+            <h1 className="text-xl font-bold tracking-tight text-white">
               Parser Plugin Studio
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-bold font-mono">
+            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 font-mono">
               Open-Closed (SOLID)
             </span>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-xs text-slate-400 mt-0.5">
             Modular plugin architecture &bull; Pre-compiled engine &bull; Interactive live testing sandbox
           </p>
         </div>
 
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-xs font-bold text-white shadow-lg shadow-cyan-500/25 transition active:scale-95 border border-cyan-400/30"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] border border-blue-500/30"
         >
           <Plus className="h-4 w-4" />
           <span>Register Custom Plugin</span>
@@ -114,32 +115,32 @@ export const ParsersView: React.FC = () => {
 
       {/* Active Parser Plugins Grid */}
       <div className="space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+        <h2 className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
           Installed Parser Plugins ({parsers.length})
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {parsers.map((p) => (
             <div
               key={p.format_key}
-              className="glass-panel p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all group"
+              className="glass-panel p-4 rounded-xl border border-slate-800 hover:border-slate-700 flex flex-col justify-between transition-all group"
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white group-hover:text-cyan-200 transition">
+                  <span className="text-xs font-semibold text-white group-hover:text-blue-300 transition">
                     {p.name}
                   </span>
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold uppercase ${
+                    className={`text-[10px] px-2 py-0.5 rounded font-mono font-medium uppercase ${
                       p.is_builtin
-                        ? 'bg-blue-500/15 text-blue-300 border border-blue-500/30'
-                        : 'bg-purple-500/15 text-purple-300 border border-purple-500/30'
+                        ? 'bg-blue-950/40 text-blue-400 border border-blue-800/40'
+                        : 'bg-slate-800 text-slate-300 border border-slate-700'
                     }`}
                   >
                     {p.is_builtin ? 'Built-in' : 'Custom'}
                   </span>
                 </div>
-                <div className="mt-1 text-[10px] font-mono text-cyan-400">
+                <div className="mt-1 text-[10px] font-mono text-slate-400">
                   key: {p.format_key} &bull; v{p.version || '1.0.0'}
                 </div>
                 <p className="text-xs text-slate-400 mt-2 leading-relaxed">
@@ -147,8 +148,8 @@ export const ParsersView: React.FC = () => {
                 </p>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between">
-                <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-semibold">
+              <div className="mt-3.5 pt-2.5 border-t border-slate-800 flex items-center justify-between">
+                <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-medium">
                   <CheckCircle2 className="h-3 w-3" /> Active Pipeline
                 </span>
                 <button
@@ -166,9 +167,10 @@ export const ParsersView: React.FC = () => {
                       setSampleLine('2026-09-16 10:32:21 [Security] EventID=4625 Level=Information Host=DC-PROD-01 Message="Account failed logon"');
                     }
                   }}
-                  className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+                  className="text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1"
                 >
-                  <span>Load into Sandbox</span> &rarr;
+                  <span>Load into Sandbox</span>
+                  <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
             </div>
@@ -177,11 +179,11 @@ export const ParsersView: React.FC = () => {
       </div>
 
       {/* Interactive Sandbox Test Bench */}
-      <div className="glass-panel p-6 rounded-2xl space-y-4">
+      <div className="glass-panel p-5 rounded-xl border border-slate-800 space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Terminal className="h-4 w-4 text-cyan-400" />
+            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+              <Terminal className="h-4 w-4 text-blue-400" />
               Interactive Parser Sandbox
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -191,22 +193,22 @@ export const ParsersView: React.FC = () => {
           <button
             onClick={handleTestSandbox}
             disabled={testing}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-500/20 transition active:scale-95 disabled:opacity-50 border border-cyan-400/30"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-sm transition active:scale-[0.98] disabled:opacity-50 border border-blue-500/30"
           >
             <Play className="h-3.5 w-3.5 fill-current" />
             <span>{testing ? 'Testing Sandbox...' : 'Run Parser Sandbox'}</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
               Target Parser Plugin
             </label>
             <select
               value={selectedParser}
               onChange={(e) => setSelectedParser(e.target.value)}
-              className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/60"
+              className="w-full bg-[#090d15] border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
             >
               {parsers.map((p) => (
                 <option key={p.format_key} value={p.format_key}>
@@ -217,23 +219,23 @@ export const ParsersView: React.FC = () => {
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
               Sample Log Input String
             </label>
             <input
               type="text"
               value={sampleLine}
               onChange={(e) => setSampleLine(e.target.value)}
-              className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500/60"
+              className="w-full bg-[#090d15] border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500"
             />
           </div>
         </div>
 
         {/* Live Test Results Output */}
         {testResult && (
-          <div className="p-4 rounded-xl bg-[#05070d] border border-white/[0.08] space-y-3">
+          <div className="p-3.5 rounded-lg bg-[#090d15] border border-slate-800 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
                 {testResult.success ? (
                   <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 ) : (
@@ -242,10 +244,10 @@ export const ParsersView: React.FC = () => {
                 Execution Telemetry ({testResult.parser_name})
               </span>
               <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+                className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold uppercase ${
                   testResult.success
-                    ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                    : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                    ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-800/40'
+                    : 'bg-rose-950/40 text-rose-400 border border-rose-800/40'
                 }`}
               >
                 {testResult.success ? 'PASSED' : 'PARSE ERROR'}
@@ -258,21 +260,21 @@ export const ParsersView: React.FC = () => {
                   <div className="text-[11px] text-slate-400 mb-1 font-sans font-semibold">
                     1. Raw Extracted Fields:
                   </div>
-                  <pre className="p-3 rounded-lg bg-black/40 border border-white/[0.04] text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
+                  <pre className="p-3 rounded-lg bg-black/40 border border-slate-800 text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-56 overflow-y-auto">
                     {JSON.stringify(testResult.parsed_fields, null, 2)}
                   </pre>
                 </div>
                 <div>
-                  <div className="text-[11px] text-cyan-300 mb-1 font-sans font-semibold">
+                  <div className="text-[11px] text-blue-400 mb-1 font-sans font-semibold">
                     2. Universal Schema (Cleaned & Normalized):
                   </div>
-                  <pre className="p-3 rounded-lg bg-black/40 border border-cyan-500/30 text-cyan-200 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
+                  <pre className="p-3 rounded-lg bg-black/40 border border-slate-800 text-slate-200 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-56 overflow-y-auto">
                     {JSON.stringify(testResult.normalized_log, null, 2)}
                   </pre>
                 </div>
               </div>
             ) : (
-              <div className="p-3.5 rounded-lg bg-rose-950/20 border border-rose-500/30 text-rose-300 text-xs font-mono">
+              <div className="p-3 rounded-lg bg-rose-950/20 border border-rose-800/30 text-rose-300 text-xs font-mono">
                 {testResult.error_message}
               </div>
             )}
@@ -282,24 +284,24 @@ export const ParsersView: React.FC = () => {
 
       {/* Register Custom Parser Plugin Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in">
-          <div className="glass-panel-elevated w-full max-w-lg rounded-2xl p-6 border border-cyan-500/40 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Puzzle className="h-5 w-5 text-cyan-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="glass-panel w-full max-w-lg rounded-xl p-5 border border-slate-700 shadow-2xl bg-[#0e131f]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-3.5">
+              <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                <Puzzle className="h-4 w-4 text-blue-400" />
                 Register Custom Parser Plugin
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreatePlugin} className="space-y-4 text-xs">
+            <form onSubmit={handleCreatePlugin} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-300 mb-1">
                   Plugin Display Name
                 </label>
                 <input
@@ -308,12 +310,12 @@ export const ParsersView: React.FC = () => {
                   value={newPluginName}
                   onChange={(e) => setNewPluginName(e.target.value)}
                   placeholder="e.g. My Custom Microservice Parser"
-                  className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/60"
+                  className="w-full bg-[#090d15] border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-300 mb-1">
                   Format Key (Unique slug)
                 </label>
                 <input
@@ -322,12 +324,12 @@ export const ParsersView: React.FC = () => {
                   value={newFormatKey}
                   onChange={(e) => setNewFormatKey(e.target.value)}
                   placeholder="e.g. custom_app"
-                  className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500/60"
+                  className="w-full bg-[#090d15] border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-300 mb-1">
                   Regex Pattern (With Named Groups)
                 </label>
                 <input
@@ -336,12 +338,12 @@ export const ParsersView: React.FC = () => {
                   value={newRegex}
                   onChange={(e) => setNewRegex(e.target.value)}
                   placeholder="^\[(?P<timestamp>[^\]]+)\] (?P<severity>[A-Z]+) (?P<message>.*)$"
-                  className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500/60"
+                  className="w-full bg-[#090d15] border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -349,27 +351,27 @@ export const ParsersView: React.FC = () => {
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
                   placeholder="Explains what this parser handles..."
-                  className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/60"
+                  className="w-full bg-[#090d15] border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                 ></textarea>
               </div>
 
               {pluginError && (
-                <div className="p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs">
+                <div className="p-2.5 rounded-lg bg-rose-950/30 border border-rose-800/40 text-rose-300 text-xs">
                   {pluginError}
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl bg-surface-100 hover:bg-surface-200 text-slate-300 font-semibold transition"
+                  className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 font-medium transition border border-slate-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition shadow-md shadow-cyan-500/20"
+                  className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition border border-blue-500/30"
                 >
                   Register Plugin
                 </button>

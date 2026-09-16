@@ -1,4 +1,4 @@
-# 🚀 ULPF — Universal Log Pre-processing Framework
+# ULPF — Universal Log Pre-processing Framework
 
 [![CI Tests](https://img.shields.io/badge/tests-22%20passed-emerald)](https://github.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
@@ -11,7 +11,7 @@
 
 ---
 
-## 🎯 Problem Statement
+## Problem Statement
 
 Modern enterprise infrastructures are deeply heterogeneous:
 ```
@@ -25,7 +25,7 @@ Companies are forced to write fragmented parsers, manual normalization logic, an
 
 ---
 
-## 🏗️ Architectural Pipeline
+## Architectural Pipeline
 
 ```
                     LOG SOURCES
@@ -84,7 +84,7 @@ Companies are forced to write fragmented parsers, manual normalization logic, an
 
 ---
 
-## 🌎 The Universal Log Schema
+## The Universal Log Schema
 
 Every processed log is guaranteed to conform to the following schema:
 
@@ -127,7 +127,7 @@ Every processed log is guaranteed to conform to the following schema:
 
 ---
 
-## 🧠 Plugin-Based Parser Architecture
+## Plugin-Based Parser Architecture
 
 All parsers inherit from `BaseParser` (`backend/app/parsers/base.py`):
 ```python
@@ -152,7 +152,7 @@ class BaseParser(ABC):
 
 ---
 
-## 🔐 Security & Sensitive Data Redaction
+## Security & Sensitive Data Redaction
 
 ULPF automatically intercepts sensitive data in raw logs before storing normalized output:
 - **Passwords / Passphrases**: `password=SuperSecretPassword123!` $\rightarrow$ `password=********`
@@ -162,7 +162,7 @@ ULPF automatically intercepts sensitive data in raw logs before storing normaliz
 
 ---
 
-## 📊 Mathematical Quality Metrics
+## Mathematical Quality Metrics
 
 Displayed live on the Dashboard & Analytics tabs:
 
@@ -174,7 +174,7 @@ $$ \text{Average Batch Latency} = \frac{\sum \text{Processing Duration (ms)}}{\t
 
 ---
 
-## ⚡ Quickstart Guide
+## Quickstart Guide
 
 ### Prerequisites
 - Python 3.10+
@@ -204,7 +204,7 @@ npm run dev
 
 ---
 
-## 🧪 Automated Test Suite
+## Automated Test Suite
 
 Run the full pytest suite (22 unit & integration tests):
 ```bash
@@ -220,7 +220,7 @@ Tests cover:
 
 ---
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 ```bash
 # Start Backend and Frontend containers:
@@ -234,7 +234,7 @@ docker-compose --profile production up --build -d
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 SIH 2026/
@@ -268,7 +268,7 @@ SIH 2026/
 
 ---
 
-## 🏆 SIH Hackathon Evaluation Highlights
+## SIH Hackathon Evaluation Highlights
 
 1. **Not a chatbot**: Real high-performance data engineering pipeline.
 2. **Zero Data Loss Guarantee**: Raw logs are stored immutably in `raw_logs` before parsing.

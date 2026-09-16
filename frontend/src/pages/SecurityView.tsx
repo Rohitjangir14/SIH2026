@@ -119,72 +119,72 @@ export const SecurityView: React.FC = () => {
       standard: 'EU General Data Protection Regulation',
       desc: 'Automated pseudonymisation & tokenization of personal identifiers and authentication tokens.',
       status: 'Fully Enforced',
-      color: 'text-cyan-400',
+      color: 'text-blue-400',
     },
     {
       title: 'HIPAA Security Rule §164.312',
       standard: 'Health Insurance Portability & Accountability',
       desc: 'Technical safeguards protecting confidential credentials and session authorization tokens in audit trails.',
       status: 'Fully Enforced',
-      color: 'text-indigo-400',
+      color: 'text-slate-200',
     },
     {
       title: 'SOC 2 Type II (CC6.1 / CC6.7)',
       standard: 'AICPA Trust Services Criteria',
       desc: 'Guarantees boundary data sanitization prior to ingestion into analytics and external data lakes.',
       status: 'Fully Enforced',
-      color: 'text-purple-400',
+      color: 'text-slate-200',
     },
   ];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-5 max-w-5xl mx-auto">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2.5">
-          <ShieldCheck className="h-6 w-6 text-emerald-400" />
-          <h1 className="text-2xl font-black tracking-tight text-white">
+          <ShieldCheck className="h-5 w-5 text-emerald-500" />
+          <h1 className="text-xl font-bold tracking-tight text-white">
             Security, Privacy & Data Masking Studio
           </h1>
-          <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-bold font-mono">
+          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 font-mono">
             Luhn Check Verified
           </span>
         </div>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-xs text-slate-400 mt-0.5">
           Zero secret leakage &bull; Zero false positives on Windows SIDs / Order IDs &bull; Enterprise compliance audit ready
         </p>
       </div>
 
       {/* Compliance Frameworks Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         {COMPLIANCE_FRAMEWORKS.map((cf, idx) => (
-          <div key={idx} className="glass-panel p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/30 transition-all">
+          <div key={idx} className="glass-panel p-4 rounded-xl border border-slate-800 flex flex-col justify-between transition-all">
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1.5">
                 <div>
-                  <h3 className={`text-sm font-bold ${cf.color}`}>{cf.title}</h3>
+                  <h3 className={`text-xs font-semibold ${cf.color}`}>{cf.title}</h3>
                   <p className="text-[10px] text-slate-400 font-medium">{cf.standard}</p>
                 </div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
                   {cf.status}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-2 leading-relaxed">{cf.desc}</p>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">{cf.desc}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Interactive PII Sanitizer Sandbox */}
-      <div className="glass-panel p-6 rounded-2xl space-y-4">
+      <div className="glass-panel p-5 rounded-xl border border-slate-800 space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 text-cyan-300 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="h-4 w-4 text-cyan-400" />
+            <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
               Interactive Sanitization Sandbox
             </div>
-            <h2 className="text-base font-bold text-white mt-0.5">
+            <h2 className="text-sm font-semibold text-white mt-0.5">
               Live Mod-10 Checksum & SID Preservation Test
             </h2>
             <p className="text-xs text-slate-400">
@@ -202,7 +202,7 @@ export const SecurityView: React.FC = () => {
                   setMaskedOutput(null);
                   setAnalysis(null);
                 }}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surface-50 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-200 border border-white/[0.08] hover:border-cyan-500/30 transition"
+                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#111622] hover:bg-[#161d2c] text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition"
               >
                 {preset.name}
               </button>
@@ -211,67 +211,67 @@ export const SecurityView: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+          <label className="block text-xs font-semibold text-slate-300 mb-1">
             Raw Input Log String
           </label>
           <textarea
             rows={3}
             value={testInput}
             onChange={(e) => setTestInput(e.target.value)}
-            className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl p-3.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500/60 shadow-inner"
+            className="w-full bg-[#090d15] border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500 shadow-inner"
           ></textarea>
         </div>
 
         <div className="flex justify-end">
           <button
             onClick={simulateMasking}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/25 transition active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition active:scale-[0.98] border border-blue-500/30"
           >
-            <Play className="h-4 w-4 fill-current" />
+            <Play className="h-3.5 w-3.5 fill-current" />
             <span>Execute Sanitization Check</span>
           </button>
         </div>
 
         {/* Output Area */}
         {maskedOutput && (
-          <div className="mt-4 p-5 rounded-xl bg-[#05070d] border border-emerald-500/30 space-y-4">
+          <div className="mt-3.5 p-4 rounded-lg bg-[#090d15] border border-slate-800 space-y-3.5">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4" />
                   Sanitized Pipeline Output:
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">Zero False Positives</span>
               </div>
-              <div className="p-3.5 rounded-lg bg-black/50 border border-white/[0.04] font-mono text-xs text-slate-200 leading-relaxed break-all">
+              <div className="p-3 rounded-lg bg-black/40 border border-slate-800 font-mono text-xs text-slate-200 leading-relaxed break-all">
                 {maskedOutput}
               </div>
             </div>
 
             {/* Validation Verification Indicators */}
             {analysis && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-white/[0.06]">
-                <div className="p-2.5 rounded-lg bg-surface-50 border border-white/[0.06] flex items-center gap-2 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800">
+                <div className="p-2.5 rounded-lg bg-[#111622] border border-slate-800 flex items-center gap-2 text-xs">
                   <Check className="h-4 w-4 text-emerald-400 shrink-0" />
                   <div>
-                    <span className="font-bold text-slate-200">Windows SIDs:</span>
-                    <span className="text-emerald-300 ml-1">Preserved</span>
+                    <span className="font-semibold text-slate-300">Windows SIDs:</span>
+                    <span className="text-emerald-400 ml-1 font-medium">Preserved</span>
                   </div>
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-surface-50 border border-white/[0.06] flex items-center gap-2 text-xs">
+                <div className="p-2.5 rounded-lg bg-[#111622] border border-slate-800 flex items-center gap-2 text-xs">
                   <Check className="h-4 w-4 text-emerald-400 shrink-0" />
                   <div>
-                    <span className="font-bold text-slate-200">Order IDs:</span>
-                    <span className="text-emerald-300 ml-1">Preserved</span>
+                    <span className="font-semibold text-slate-300">Order IDs:</span>
+                    <span className="text-emerald-400 ml-1 font-medium">Preserved</span>
                   </div>
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-surface-50 border border-white/[0.06] flex items-center gap-2 text-xs">
+                <div className="p-2.5 rounded-lg bg-[#111622] border border-slate-800 flex items-center gap-2 text-xs">
                   <Check className="h-4 w-4 text-emerald-400 shrink-0" />
                   <div>
-                    <span className="font-bold text-slate-200">Luhn Checked PAN:</span>
-                    <span className="text-emerald-300 ml-1">Redacted</span>
+                    <span className="font-semibold text-slate-300">Luhn Checked PAN:</span>
+                    <span className="text-emerald-400 ml-1 font-medium">Redacted</span>
                   </div>
                 </div>
               </div>

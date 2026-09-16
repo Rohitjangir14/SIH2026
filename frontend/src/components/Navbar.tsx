@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Layers,
-  Sparkles,
-  Zap,
+  UploadCloud,
   Clock,
   Gauge,
-  Activity,
-  ShieldCheck,
-  Terminal,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -29,82 +25,55 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#090d16]/90 backdrop-blur-xl">
-      <div className="flex h-16 items-center justify-between px-6 w-full">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-[#10141f]">
+      <div className="flex h-14 items-center justify-between px-6 w-full">
         {/* Brand & Platform Identity */}
         <div
-          className="flex items-center gap-3.5 cursor-pointer group select-none"
+          className="flex items-center gap-3 cursor-pointer select-none"
           onClick={() => onNavigate('dashboard')}
         >
-          <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 via-sky-500 to-indigo-600 shadow-md shadow-cyan-500/25 text-white font-black group-hover:scale-105 transition-all">
-              <Layers className="h-5 w-5 text-white" />
-            </div>
-            <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400 border-2 border-[#090d16]"></span>
-            </span>
+          <div className="h-8 w-8 rounded-lg overflow-hidden border border-blue-500/40 shadow-sm flex items-center justify-center bg-[#090d15] shrink-0">
+            <img src="/logo.png" alt="ULPF Logo" className="h-full w-full object-cover" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-lg tracking-tight text-white group-hover:text-cyan-300 transition-colors">
+              <span className="font-bold text-base text-slate-100 tracking-tight">
                 ULPF
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                Enterprise SIH
+              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+                v1.0.0
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium tracking-normal">
-              Universal Log Pre-processing Framework
-            </p>
           </div>
         </div>
 
-        {/* Center Live Tickers */}
+        {/* Center Live Tickers (Clean, Subdued Corporate) */}
         <div className="hidden lg:flex items-center gap-3 text-xs">
-          {/* Engine Speed Indicator */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 shadow-sm">
-            <Gauge className="h-3.5 w-3.5 text-cyan-400" />
-            <span className="text-slate-400">Engine Speed:</span>
-            <span className="font-mono font-bold text-cyan-300">9,250+ EPS</span>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+            <Gauge className="h-3.5 w-3.5 text-blue-400" />
+            <span className="text-slate-400">Throughput:</span>
+            <span className="font-mono font-semibold text-slate-200">9,250+ EPS</span>
           </div>
 
-          {/* Lossless Status */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-            </span>
-            <span>Lossless Pipeline Active</span>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="text-slate-300 font-medium">Pipeline Active</span>
           </div>
 
-          {/* Clock */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 font-mono text-[11px] text-slate-400">
-            <Clock className="h-3.5 w-3.5 text-slate-400" />
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-400">
+            <Clock className="h-3 w-3 text-slate-400" />
             <span>{utcTime || 'UTC'}</span>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => onNavigate('analytics')}
-            className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
-              currentTab === 'analytics'
-                ? 'bg-purple-500/20 text-purple-300 border-purple-500/30 shadow-sm'
-                : 'text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-850 border-slate-800'
-            }`}
-          >
-            <Zap className="h-3.5 w-3.5 text-amber-400" />
-            <span>Telemetry</span>
-          </button>
-
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => onNavigate('ingestion')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold shadow-md shadow-cyan-500/20 transition-all active:scale-[0.98]"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition active:scale-[0.98]"
           >
-            <Sparkles className="h-3.5 w-3.5" />
+            <UploadCloud className="h-3.5 w-3.5" />
             <span>Ingest Logs</span>
           </button>
         </div>

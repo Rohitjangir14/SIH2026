@@ -197,31 +197,31 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-5 max-w-5xl mx-auto">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2.5">
-          <UploadCloud className="h-6 w-6 text-cyan-400" />
-          <h1 className="text-2xl font-black tracking-tight text-white">
+          <UploadCloud className="h-5 w-5 text-blue-500" />
+          <h1 className="text-xl font-bold tracking-tight text-white">
             Log Ingestion Studio
           </h1>
-          <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-xs font-bold">
+          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
             Zero Configuration
           </span>
         </div>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-xs text-slate-400 mt-1">
           Ingest heterogeneous raw logs &bull; Heuristic format auto-detection (51k/sec) &bull; Immediate normalization pipeline
         </p>
       </div>
 
       {/* 1-Click Sample Preloader Bar */}
-      <div className="glass-panel p-4 rounded-2xl space-y-2.5">
+      <div className="glass-panel p-4 rounded-xl border border-slate-800 space-y-2.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
-            <Zap className="h-4 w-4 text-amber-400" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+            <Zap className="h-4 w-4 text-amber-500" />
             <span>Pre-Loaded Industrial Datasets (1-Click Test):</span>
           </div>
-          <span className="text-[10px] font-mono text-slate-400">8 Supported Formats</span>
+          <span className="text-[10px] font-mono text-slate-500">8 Supported Formats</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -229,12 +229,12 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
             <button
               key={key}
               onClick={() => handleSelectSample(key)}
-              className="p-2.5 rounded-xl bg-surface-50/90 hover:bg-cyan-500/15 text-left border border-white/[0.06] hover:border-cyan-500/35 transition-all group"
+              className="p-2.5 rounded-lg bg-[#111622] hover:bg-[#161d2c] text-left border border-slate-800 hover:border-slate-700 transition-all group"
             >
               <div className="flex items-center justify-between text-[10px] font-mono">
-                <span className="text-slate-400 group-hover:text-cyan-300 font-semibold">{item.tag}</span>
+                <span className="text-slate-400 group-hover:text-blue-400 font-semibold">{item.tag}</span>
               </div>
-              <p className="text-xs font-bold text-slate-200 group-hover:text-white mt-1 truncate">
+              <p className="text-xs font-semibold text-slate-200 group-hover:text-white mt-1 truncate">
                 {item.label}
               </p>
             </button>
@@ -243,41 +243,41 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
       </div>
 
       {/* Mode Switcher Tabs */}
-      <div className="flex items-center gap-2 border-b border-white/[0.08] pb-3">
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
         <button
           onClick={() => setActiveMode('paste')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 ${
             activeMode === 'paste'
-              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
-              : 'text-slate-400 hover:text-slate-200 bg-surface-50/50 border border-transparent'
+              ? 'bg-blue-600 text-white shadow-sm border border-blue-500/40'
+              : 'text-slate-400 hover:text-slate-200 bg-[#111622] border border-slate-800'
           }`}
         >
-          <FileText className="h-4 w-4" />
+          <FileText className="h-3.5 w-3.5" />
           Direct Raw Paste
         </button>
         <button
           onClick={() => setActiveMode('upload')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 ${
             activeMode === 'upload'
-              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
-              : 'text-slate-400 hover:text-slate-200 bg-surface-50/50 border border-transparent'
+              ? 'bg-blue-600 text-white shadow-sm border border-blue-500/40'
+              : 'text-slate-400 hover:text-slate-200 bg-[#111622] border border-slate-800'
           }`}
         >
-          <UploadCloud className="h-4 w-4" />
+          <UploadCloud className="h-3.5 w-3.5" />
           Batch File Upload (.log, .txt, .json, .csv)
         </button>
       </div>
 
       {/* Main Input Box */}
-      <div className="glass-panel p-6 rounded-2xl space-y-4">
+      <div className="glass-panel p-5 rounded-xl border border-slate-800 space-y-4">
         {activeMode === 'paste' ? (
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold text-slate-300">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-slate-300">
                 Raw Log Stream (Multi-line text or JSON array)
               </label>
               {pastedText && (
-                <span className="text-[10px] font-mono text-slate-400">
+                <span className="text-[10px] font-mono text-slate-500">
                   {pastedText.split('\n').filter(Boolean).length} lines &bull; {pastedText.length} bytes
                 </span>
               )}
@@ -287,33 +287,33 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
               placeholder="Paste raw log lines here... e.g. Sep 16 10:32:21 server01 sshd: Failed password for user ronak"
-              className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl p-3.5 text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/60 leading-relaxed shadow-inner"
+              className="w-full bg-[#090d15] border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 leading-relaxed shadow-inner"
             ></textarea>
           </div>
         ) : (
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-2">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               Select or Drop Log File
             </label>
-            <div className="border-2 border-dashed border-white/[0.08] hover:border-cyan-500/40 rounded-2xl p-8 text-center transition-all bg-[#05070d]/60">
-              <UploadCloud className="h-10 w-10 text-cyan-400 mx-auto mb-2" />
-              <p className="text-sm font-bold text-slate-200">
+            <div className="border-2 border-dashed border-slate-800 hover:border-slate-700 rounded-xl p-8 text-center transition-all bg-[#090d15]/60">
+              <UploadCloud className="h-9 w-9 text-slate-400 mx-auto mb-2" />
+              <p className="text-xs font-semibold text-slate-200">
                 {file ? file.name : 'Drag and drop your raw log file here, or click to browse'}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Supports .log, .txt, .json, .csv, and syslog streams</p>
+              <p className="text-[11px] text-slate-500 mt-1">Supports .log, .txt, .json, .csv, and syslog streams</p>
               <input
                 type="file"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="mt-4 text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-500/20 file:text-cyan-300 hover:file:bg-cyan-500/30 cursor-pointer"
+                className="mt-3 text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700 cursor-pointer"
               />
             </div>
           </div>
         )}
 
         {/* Configuration Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
               Source System Identifier
             </label>
             <input
@@ -321,18 +321,18 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
               value={sourceName}
               onChange={(e) => setSourceName(e.target.value)}
               placeholder="e.g. prod_nginx_edge, server01, aws_lambda"
-              className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500/60"
+              className="w-full bg-[#090d15] border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
               Parser Plugin Selection
             </label>
             <select
               value={forcedFormat}
               onChange={(e) => setForcedFormat(e.target.value)}
-              className="w-full bg-[#05070d] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/60"
+              className="w-full bg-[#090d15] border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
             >
               <option value="auto">Auto-Detect Format (Recommended &bull; 51k tests/s)</option>
               <option value="syslog">Linux Syslog (RFC 3164 / 5424)</option>
@@ -348,43 +348,40 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
 
         {/* Live Auto-Detection Radar Banner */}
         {detecting ? (
-          <div className="p-3.5 rounded-xl bg-surface-50 border border-cyan-500/30 flex items-center gap-3 text-xs text-cyan-300">
-            <Sparkles className="h-4 w-4 text-cyan-400 animate-spin" />
+          <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2.5 text-xs text-slate-300">
+            <Sparkles className="h-3.5 w-3.5 text-blue-400 animate-spin" />
             <span>Scanning log structure, timestamp signatures, and regex syntax heuristically...</span>
           </div>
         ) : detection ? (
-          <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-950/40 via-surface-100 to-indigo-950/40 border border-cyan-500/35 space-y-2">
+          <div className="p-3.5 rounded-lg bg-[#111622] border border-slate-800 space-y-1.5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-2.5 w-2.5 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
-                </span>
-                <span className="text-xs font-bold text-white">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                <span className="text-xs font-semibold text-white">
                   Detected Signature:
-                  <span className="text-cyan-300 uppercase font-mono tracking-wider ml-1.5 px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/30">
+                  <span className="text-blue-400 uppercase font-mono ml-1.5 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-[11px]">
                     {detection.detected_format}
                   </span>
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-emerald-950/40 text-emerald-400 border border-emerald-800/40">
                   {Math.round(detection.confidence * 100)}% Confidence
                 </span>
               </div>
 
-              <div className="text-xs text-slate-300 font-medium">
-                Parser Assigned: <span className="text-white font-mono font-bold">{detection.recommended_parser}</span>
+              <div className="text-xs text-slate-400">
+                Parser Assigned: <span className="text-slate-200 font-mono font-medium">{detection.recommended_parser}</span>
               </div>
             </div>
 
             <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
-              Detection Evidence: {detection.reason}
+              Evidence: {detection.reason}
             </p>
           </div>
         ) : null}
 
         {/* Error Alert */}
         {errorMsg && (
-          <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300 font-medium">
+          <div className="p-3 rounded-lg bg-rose-950/30 border border-rose-800/40 flex items-center gap-2 text-xs text-rose-300 font-medium">
             <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -395,16 +392,16 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
           <button
             onClick={handleStartPipeline}
             disabled={processing}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold shadow-lg shadow-cyan-500/25 transition active:scale-95 disabled:opacity-50 border border-cyan-400/30"
+            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition active:scale-[0.98] disabled:opacity-50 border border-blue-500/30"
           >
             {processing ? (
               <>
-                <Sparkles className="h-4 w-4 animate-spin" />
+                <Sparkles className="h-3.5 w-3.5 animate-spin" />
                 <span>Executing Ingestion Pipeline...</span>
               </>
             ) : (
               <>
-                <Play className="h-4 w-4 fill-current" />
+                <Play className="h-3.5 w-3.5 fill-current" />
                 <span>Start Ingestion Pipeline</span>
               </>
             )}
@@ -414,57 +411,57 @@ Sep 16 10:34:15 server01 kernel: [ 4512.102931] TCP: request_sock_TCP: Possible 
 
       {/* Execution Results Summary & Dual-View Transformation Card */}
       {jobResult && (
-        <div className="glass-panel-elevated p-6 rounded-2xl border-emerald-500/40 bg-emerald-950/10 space-y-4">
+        <div className="glass-panel p-5 rounded-xl border border-slate-800 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 text-emerald-400 font-bold text-sm">
-              <CheckCircle2 className="h-5 w-5" />
+            <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs">
+              <CheckCircle2 className="h-4 w-4" />
               <span>Batch Pipeline Completed: Job {jobResult.id.slice(0, 8)}</span>
             </div>
-            <span className="text-xs font-mono text-slate-400">
-              Execution Duration: <span className="text-white font-bold">{jobResult.duration_ms} ms</span>
+            <span className="text-[11px] font-mono text-slate-400">
+              Duration: <span className="text-slate-200 font-bold">{jobResult.duration_ms} ms</span>
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-            <div className="p-3 rounded-xl bg-surface-50/90 border border-white/[0.06]">
-              <div className="text-[11px] text-slate-400 font-bold">Total Ingested</div>
-              <div className="text-xl font-black text-white mt-1 font-mono">{jobResult.total_records}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+            <div className="p-3 rounded-lg bg-[#090d15] border border-slate-800">
+              <div className="text-[10px] text-slate-400 uppercase font-semibold">Total Ingested</div>
+              <div className="text-lg font-bold text-white mt-1 font-mono">{jobResult.total_records}</div>
             </div>
-            <div className="p-3 rounded-xl bg-surface-50/90 border border-white/[0.06]">
-              <div className="text-[11px] text-slate-400 font-bold">Normalized to ULS</div>
-              <div className="text-xl font-black text-emerald-400 mt-1 font-mono">{jobResult.processed_records}</div>
+            <div className="p-3 rounded-lg bg-[#090d15] border border-slate-800">
+              <div className="text-[10px] text-slate-400 uppercase font-semibold">Normalized to ULS</div>
+              <div className="text-lg font-bold text-emerald-400 mt-1 font-mono">{jobResult.processed_records}</div>
             </div>
-            <div className="p-3 rounded-xl bg-surface-50/90 border border-white/[0.06]">
-              <div className="text-[11px] text-slate-400 font-bold">Validation Errors</div>
-              <div className="text-xl font-black text-rose-400 mt-1 font-mono">{jobResult.failed_records}</div>
+            <div className="p-3 rounded-lg bg-[#090d15] border border-slate-800">
+              <div className="text-[10px] text-slate-400 uppercase font-semibold">Validation Errors</div>
+              <div className="text-lg font-bold text-rose-400 mt-1 font-mono">{jobResult.failed_records}</div>
             </div>
-            <div className="p-3 rounded-xl bg-surface-50/90 border border-white/[0.06]">
-              <div className="text-[11px] text-slate-400 font-bold">Pipeline Success Rate</div>
-              <div className="text-xl font-black text-cyan-300 mt-1 font-mono">{jobResult.success_rate}%</div>
+            <div className="p-3 rounded-lg bg-[#090d15] border border-slate-800">
+              <div className="text-[10px] text-slate-400 uppercase font-semibold">Success Rate</div>
+              <div className="text-lg font-bold text-blue-400 mt-1 font-mono">{jobResult.success_rate}%</div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/[0.06]">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-800">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
               <span>Raw logs immutably stored &bull; Luhn-checked PII masked &bull; Universal Schema validated</span>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCopyJSON}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-100 hover:bg-surface-200 text-slate-300 text-xs font-semibold border border-white/[0.08] transition"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-medium border border-slate-700 transition"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                <span>{copied ? 'Copied' : 'Copy Job Telemetry'}</span>
+                <span>{copied ? 'Copied' : 'Copy Telemetry'}</span>
               </button>
 
               <button
                 onClick={() => onNavigate('explorer')}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/40 text-xs font-bold transition"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/40 text-xs font-semibold transition"
               >
                 <span>Inspect in Log Explorer</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
